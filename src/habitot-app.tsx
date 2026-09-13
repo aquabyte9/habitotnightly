@@ -847,6 +847,64 @@ function BootScreen({ label = 'Making room for your day' }: { label?: string }) 
   </main>;
 }
 
+function LevelUpCelebration({ level, onDismiss }: { level: number; onDismiss: () => void }) {
+  const pieces = useMemo(() => Array.from({ length: 42 }, (_, index) => {
+    const colors = ['var(--flame)', 'var(--teal)', '#df765d', '#f3d9a4'];
+    return {
+      id: index,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      duration: 1.9 + Math.random() * 1.1,
+      drift: `${Math.round((Math.random() - 0.5) * 220)}px`,
+      spin: `${Math.round(360 + Math.random() * 720)}deg`,
+      size: 6 + Math.round(Math.random() * 7),
+      round: Math.random() > 0.6,
+      color: colors[index % colors.length] as string,
+    };
+  }), [level]);
+
+  useEffect(() => {
+    const onKey = (nativeEvent: KeyboardEvent) => { if (nativeEvent.key === 'Escape') onDismiss(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onDismiss]);
+
+  return <div
+    role="dialog"
+    aria-modal="true"
+    aria-label={`Level ${level} reached`}
+    onClick={onDismiss}
+    className="levelup-overlay fixed inset-0 z-[80] grid cursor-pointer place-items-center bg-ink/85 px-6 backdrop-blur-sm"
+    data-testid="overlay-level-up"
+  >
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {pieces.map((piece) => <span
+        key={piece.id}
+        className="confetti-piece"
+        style={{
+          left: `${piece.left}%`,
+          width: piece.size,
+          height: piece.round ? piece.size : piece.size * 1.8,
+          background: piece.color,
+          borderRadius: piece.round ? '9999px' : '2px',
+          animationDelay: `${piece.delay}s`,
+          animationDuration: `${piece.duration}s`,
+          ['--drift' as string]: piece.drift,
+          ['--spin' as string]: piece.spin,
+        }}
+      />)}
+    </div>
+
+    <div className="relative w-full max-w-[340px] text-center text-cream">
+      <div className="levelup-mascot mx-auto w-fit"><MascotMark className="size-20" /></div>
+      <div className="levelup-rise eyebrow mt-6 text-flame" style={{ animationDelay: '.1s' }}>Level up</div>
+      <div className="levelup-number mt-2 font-display text-[92px] font-semibold leading-none tracking-[-.07em] text-flame drop-shadow-[0_0_28px_rgba(243,180,100,.45)]" data-testid="text-level-up-number">{level}</div>
+      <p className="levelup-rise mt-4 text-sm leading-6 text-[#d8cdbc]" style={{ animationDelay: '.22s' }}>That is a whole new level of you. Keep the streak going.</p>
+      <div className="levelup-rise mt-6 font-mono text-[10px] uppercase tracking-[.18em] text-[#a49b8a]" style={{ animationDelay: '.3s' }}>Tap anywhere to continue</div>
+    </div>
+  </div>;
+}
+
 function DashboardPreview() {
   const [view, setView] = useState<View>('dashboard');
   const [tasks, setTasks] = useState<HabitTask[]>([]);
