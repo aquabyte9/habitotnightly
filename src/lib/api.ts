@@ -123,6 +123,9 @@ export function streakFromProfile(profile: HabitProfile | null): { streak: numbe
   return { streak: 0, today };
 }
 
+/** Backwards-compatible alias used by the app shell. */
+export const nextStreak = streakFromProfile;
+
 /** Streak value after finishing a task right now. */
 export function streakAfterCompletion(lastDoneOn: string | null, storedStreak: number): { streak: number; today: string } {
   const today = todayKey();
