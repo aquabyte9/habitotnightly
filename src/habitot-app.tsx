@@ -1066,6 +1066,37 @@ function DashboardPreview() {
       setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete that task.');
     }
   };
+  const addEvent = async (input: { iso: string; title: string; time: string }) => {
+    const local: HabitEvent = {
+      id: `event-${Date.now()}`,
+      iso: input.iso,
+      day: new Date(`${input.iso}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
+      date: String(new Date(`${input.iso}T00:00:00`).getDate()),
+      title: input.title,
+      time: input.time,
+      tone: 'teal',
+    };
+    if (!user) { setEvents((current) => [...current, local]); return; }
+    try {
+      const saved = await createEvent(input);
+      setEvents((current) => [...current, saved]);
+      setError('');
+    } catch (createError) {
+      setEvents((current) => [...current, local]);
+      setError(createError instanceof Error ? createError.message : 'Unable to save that event.');
+    }
+  };
+  const removeEvent = async (id: string) => {
+    const previous = events;
+    setEvents((current) => current.filter((item) => item.id !== id));
+    if (!user) return;
+    try {
+      await deleteEvent(id);
+    } catch (deleteError) {
+      setEvents(previous);
+      setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete that event.');
+    }
+  };
   const logout = async () => {
     await signOut();
     setUser(null);
@@ -1074,6 +1105,9 @@ function DashboardPreview() {
     setEvents([]);
     setXp(0);
     setStreak(1);
+    setLastDoneOn(null);
+    setCelebrateLevel(null);
+    levelRef.current = 1;
     setLeaderboard([]);
     setLeaderboardError('');
     setView('dashboard');
