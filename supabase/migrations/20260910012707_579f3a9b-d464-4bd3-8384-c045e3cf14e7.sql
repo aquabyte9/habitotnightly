@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.sync_leaderboard() FROM PUBLIC, anon, authenticated;
