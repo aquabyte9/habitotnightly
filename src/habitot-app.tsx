@@ -590,13 +590,37 @@ function ProfileHeader({ streak, xp, name, avatarUrl }: { streak: number; xp: nu
   const into = safeXp % XP_PER_LEVEL;
   const goal = XP_PER_LEVEL;
   const pct = Math.max(0, Math.min(100, (into / goal) * 100));
-  return <section className="rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid="card-profile-header">
-    <div className="flex flex-wrap items-center gap-3">
-      <ProfileAvatar avatarUrl={avatarUrl} name={name} />
-      <div><div className="font-display text-base font-semibold" data-testid="text-profile-name">{name}</div><div className="eyebrow mt-1 text-[#82796d]">Level {level} · finding momentum</div></div>
-      <div className="streak-pill ml-auto flex items-center gap-2 rounded-full border border-flame/25 bg-flame/10 px-3 py-2" key={streak}><Flame className="size-4 text-flame" fill="currentColor" /><span className="font-display text-sm font-semibold">Current streak: {streak}</span><span className="font-mono text-[9px] uppercase text-flame/80">days</span></div>
+  return <section className="relative overflow-hidden rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid="card-profile-header">
+    <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-flame/10 via-teal/5 to-transparent" />
+    <div className="relative flex flex-wrap items-start gap-4">
+      <div className="relative shrink-0">
+        <div className="absolute -inset-1 rounded-[16px] bg-gradient-to-br from-flame to-teal opacity-60 blur-[1px]" />
+        <ProfileAvatar avatarUrl={avatarUrl} name={name} size="size-14" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="font-display text-base font-semibold" data-testid="text-profile-name">{name}</div>
+          <span className="rounded-full bg-flame/10 px-2 py-0.5 font-mono text-[10px] font-medium text-flame">Lvl {level}</span>
+        </div>
+        <div className="eyebrow mt-1 text-muted-foreground">finding momentum</div>
+      </div>
+      <div className="streak-pill flex items-center gap-2 rounded-full border border-flame/25 bg-flame/10 px-3 py-2" key={streak}>
+        <Flame className="size-4 text-flame" fill="currentColor" />
+        <div className="flex flex-col leading-none">
+          <span className="font-display text-lg font-semibold">{streak}</span>
+          <span className="font-mono text-[8px] uppercase text-flame/80">day streak</span>
+        </div>
+      </div>
     </div>
-    <div className="mt-5"><div className="mb-2 flex items-end justify-between"><span className="eyebrow text-[#82796d]">XP to level {level + 1}</span><span className="font-mono text-[11px] text-[#b0a797]" data-testid="text-xp-progress">{Math.max(0, into)} / {goal}</span></div><div className="h-2.5 overflow-hidden rounded-full bg-[#433b32]"><div className="xp-bar-glow h-full rounded-full bg-flame transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} data-testid="bar-xp" /></div></div>
+    <div className="relative mt-6">
+      <div className="mb-2 flex items-end justify-between">
+        <span className="eyebrow text-muted-foreground">XP to level {level + 1}</span>
+        <span className="font-mono text-[11px] text-muted-foreground" data-testid="text-xp-progress">{Math.max(0, into)} / {goal}</span>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-raised">
+        <div className="xp-bar-glow h-full rounded-full bg-gradient-to-r from-flame to-coral transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} data-testid="bar-xp" />
+      </div>
+    </div>
   </section>;
 }
 
