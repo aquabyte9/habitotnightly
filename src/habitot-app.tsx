@@ -6,8 +6,12 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import {
   createTask,
+  createEvent,
+  deleteEvent,
   deleteTask,
   getAccount,
+  getEvents,
+  streakAfterCompletion,
   getLeaderboard,
   getSession,
   requestAvatarUpload,
