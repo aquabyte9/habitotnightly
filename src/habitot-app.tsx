@@ -1010,14 +1010,24 @@ function DashboardPreview() {
     const next = !task.done;
     const nextXp = Math.max(0, xp + (next ? task.xp : -task.xp));
     setTasks((current) => current.map((item) => item.id === id ? { ...item, done: next } : item));
-    setXp(nextXp);
+    commitXp(nextXp);
+    // Finishing something today keeps the streak alive.
+    const progress: { xp: number; streakDays?: number; lastActiveOn?: string } = { xp: nextXp };
+    if (next) {
+      const { streak: nextStreakValue, today } = streakAfterCompletion(lastDoneOn, streak);
+      setStreak(nextStreakValue);
+      setLastDoneOn(today);
+      progress.streakDays = nextStreakValue;
+      progress.lastActiveOn = today;
+    }
     if (user) {
       try {
         await updateTask(id, next);
-        await saveProgress({ xp: nextXp });
+        await saveProgress(progress);
       } catch (updateError) {
         setTasks((current) => current.map((item) => item.id === id ? { ...item, done: task.done } : item));
         setXp(xp);
+        levelRef.current = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
         setError(updateError instanceof Error ? updateError.message : 'Unable to save that change.');
       }
     }
@@ -1025,6 +1035,9 @@ function DashboardPreview() {
   const awardXp = useCallback((amount: number) => {
     setXp((current) => {
       const next = Math.max(0, current + amount);
+      const nextLevel = Math.floor(next / XP_PER_LEVEL) + 1;
+      if (nextLevel > levelRef.current) setCelebrateLevel(nextLevel);
+      levelRef.current = nextLevel;
       void saveProgress({ xp: next }).catch(() => undefined);
       return next;
     });
