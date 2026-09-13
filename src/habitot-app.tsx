@@ -1123,7 +1123,8 @@ function DashboardPreview() {
   return <AppShell title={title} view={view} onView={setView}>
     <AuthPanel user={user} open={authOpen} onOpenChange={setAuthOpen} onAuthed={hydrate} onLogout={logout} />
     {error && <div className="mb-4 rounded-[12px] border border-coral/30 bg-coral/10 px-4 py-3 text-xs text-[#f2b3a8]" role="alert">{error}</div>}
-    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(event) => setEvents((current) => [...current, event])} onDelete={(id) => setEvents((current) => current.filter((item) => item.id !== id))} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} /> : <FocusView onSessionComplete={awardXp} />}
+    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(input) => void addEvent(input)} onDelete={(id) => void removeEvent(id)} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} /> : <FocusView onSessionComplete={awardXp} />}
+    {celebrateLevel !== null && <LevelUpCelebration level={celebrateLevel} onDismiss={() => setCelebrateLevel(null)} />}
   </AppShell>;
 }
 
@@ -1328,7 +1329,7 @@ function TasksView({ tasks, onToggle, onDelete, onAdd, showComposer, setShowComp
   </div>;
 }
 
-function CalendarView({ events, onAdd, onDelete }: { events: HabitEvent[]; onAdd: (event: HabitEvent) => void; onDelete: (id: string) => void }) {
+function CalendarView({ events, onAdd, onDelete }: { events: HabitEvent[]; onAdd: (input: { iso: string; title: string; time: string }) => void; onDelete: (id: string) => void }) {
   const today = new Date();
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(() => dayKey(today));
@@ -1353,15 +1354,7 @@ function CalendarView({ events, onAdd, onDelete }: { events: HabitEvent[]; onAdd
 
   const submit = () => {
     if (!title.trim()) return;
-    onAdd({
-      id: `event-${Date.now()}`,
-      iso: selected,
-      day: selectedDate.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
-      date: String(selectedDate.getDate()),
-      title: title.trim(),
-      time,
-      tone: 'teal',
-    });
+    onAdd({ iso: selected, title: title.trim(), time });
     setTitle('');
     setAdding(false);
   };
