@@ -6,8 +6,12 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import {
   createTask,
+  createEvent,
+  deleteEvent,
   deleteTask,
   getAccount,
+  getEvents,
+  streakAfterCompletion,
   getLeaderboard,
   getSession,
   requestAvatarUpload,
@@ -847,6 +851,64 @@ function BootScreen({ label = 'Making room for your day' }: { label?: string }) 
   </main>;
 }
 
+function LevelUpCelebration({ level, onDismiss }: { level: number; onDismiss: () => void }) {
+  const pieces = useMemo(() => Array.from({ length: 42 }, (_, index) => {
+    const colors = ['var(--flame)', 'var(--teal)', '#df765d', '#f3d9a4'];
+    return {
+      id: index,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      duration: 1.9 + Math.random() * 1.1,
+      drift: `${Math.round((Math.random() - 0.5) * 220)}px`,
+      spin: `${Math.round(360 + Math.random() * 720)}deg`,
+      size: 6 + Math.round(Math.random() * 7),
+      round: Math.random() > 0.6,
+      color: colors[index % colors.length] as string,
+    };
+  }), [level]);
+
+  useEffect(() => {
+    const onKey = (nativeEvent: KeyboardEvent) => { if (nativeEvent.key === 'Escape') onDismiss(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onDismiss]);
+
+  return <div
+    role="dialog"
+    aria-modal="true"
+    aria-label={`Level ${level} reached`}
+    onClick={onDismiss}
+    className="levelup-overlay fixed inset-0 z-[80] grid cursor-pointer place-items-center bg-ink/85 px-6 backdrop-blur-sm"
+    data-testid="overlay-level-up"
+  >
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {pieces.map((piece) => <span
+        key={piece.id}
+        className="confetti-piece"
+        style={{
+          left: `${piece.left}%`,
+          width: piece.size,
+          height: piece.round ? piece.size : piece.size * 1.8,
+          background: piece.color,
+          borderRadius: piece.round ? '9999px' : '2px',
+          animationDelay: `${piece.delay}s`,
+          animationDuration: `${piece.duration}s`,
+          ['--drift' as string]: piece.drift,
+          ['--spin' as string]: piece.spin,
+        }}
+      />)}
+    </div>
+
+    <div className="relative w-full max-w-[340px] text-center text-cream">
+      <div className="levelup-mascot mx-auto w-fit"><MascotMark className="size-20" /></div>
+      <div className="levelup-rise eyebrow mt-6 text-flame" style={{ animationDelay: '.1s' }}>Level up</div>
+      <div className="levelup-number mt-2 font-display text-[92px] font-semibold leading-none tracking-[-.07em] text-flame drop-shadow-[0_0_28px_rgba(243,180,100,.45)]" data-testid="text-level-up-number">{level}</div>
+      <p className="levelup-rise mt-4 text-sm leading-6 text-[#d8cdbc]" style={{ animationDelay: '.22s' }}>That is a whole new level of you. Keep the streak going.</p>
+      <div className="levelup-rise mt-6 font-mono text-[10px] uppercase tracking-[.18em] text-[#a49b8a]" style={{ animationDelay: '.3s' }}>Tap anywhere to continue</div>
+    </div>
+  </div>;
+}
+
 function DashboardPreview() {
   const [view, setView] = useState<View>('dashboard');
   const [tasks, setTasks] = useState<HabitTask[]>([]);
@@ -862,7 +924,19 @@ function DashboardPreview() {
   const [showComposer, setShowComposer] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [error, setError] = useState('');
+  const [celebrateLevel, setCelebrateLevel] = useState<number | null>(null);
+  const [lastDoneOn, setLastDoneOn] = useState<string | null>(null);
+  const levelRef = useRef(1);
   const [, setLocation] = useLocation();
+
+  const commitXp = useCallback((value: number) => {
+    const nextXp = Math.max(0, value);
+    const nextLevel = Math.floor(nextXp / XP_PER_LEVEL) + 1;
+    if (nextLevel > levelRef.current) setCelebrateLevel(nextLevel);
+    levelRef.current = nextLevel;
+    setXp(nextXp);
+    return nextXp;
+  }, []);
 
   const loadLeaderboard = async () => {
     setLeaderboardLoading(true);
@@ -884,11 +958,21 @@ function DashboardPreview() {
       setUser(nextUser);
       setTasks(account.tasks);
       setProfile(account.profile);
-      setXp(Math.max(0, account.profile?.xp ?? 0));
-      const { streak: currentStreak, today } = nextStreak(account.profile);
+      const currentXp = Math.max(0, account.profile?.xp ?? 0);
+      levelRef.current = Math.floor(currentXp / XP_PER_LEVEL) + 1;
+      setXp(currentXp);
+      // The streak only counts days a task was actually finished: a full day
+      // with nothing finished drops it back to zero.
+      const { streak: currentStreak } = nextStreak(account.profile);
       setStreak(currentStreak);
-      if (currentStreak !== account.profile?.streak_days || account.profile?.last_active_on !== today) {
-        void saveProgress({ streakDays: currentStreak, lastActiveOn: today }).catch(() => undefined);
+      setLastDoneOn(account.profile?.last_active_on ?? null);
+      if (currentStreak !== (account.profile?.streak_days ?? 0)) {
+        void saveProgress({ streakDays: currentStreak }).catch(() => undefined);
+      }
+      try {
+        setEvents(await getEvents());
+      } catch {
+        setEvents([]);
       }
       setAuthOpen(false);
     } catch (loadError) {
@@ -926,14 +1010,24 @@ function DashboardPreview() {
     const next = !task.done;
     const nextXp = Math.max(0, xp + (next ? task.xp : -task.xp));
     setTasks((current) => current.map((item) => item.id === id ? { ...item, done: next } : item));
-    setXp(nextXp);
+    commitXp(nextXp);
+    // Finishing something today keeps the streak alive.
+    const progress: { xp: number; streakDays?: number; lastActiveOn?: string } = { xp: nextXp };
+    if (next) {
+      const { streak: nextStreakValue, today } = streakAfterCompletion(lastDoneOn, streak);
+      setStreak(nextStreakValue);
+      setLastDoneOn(today);
+      progress.streakDays = nextStreakValue;
+      progress.lastActiveOn = today;
+    }
     if (user) {
       try {
         await updateTask(id, next);
-        await saveProgress({ xp: nextXp });
+        await saveProgress(progress);
       } catch (updateError) {
         setTasks((current) => current.map((item) => item.id === id ? { ...item, done: task.done } : item));
         setXp(xp);
+        levelRef.current = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
         setError(updateError instanceof Error ? updateError.message : 'Unable to save that change.');
       }
     }
@@ -941,6 +1035,9 @@ function DashboardPreview() {
   const awardXp = useCallback((amount: number) => {
     setXp((current) => {
       const next = Math.max(0, current + amount);
+      const nextLevel = Math.floor(next / XP_PER_LEVEL) + 1;
+      if (nextLevel > levelRef.current) setCelebrateLevel(nextLevel);
+      levelRef.current = nextLevel;
       void saveProgress({ xp: next }).catch(() => undefined);
       return next;
     });
@@ -969,6 +1066,37 @@ function DashboardPreview() {
       setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete that task.');
     }
   };
+  const addEvent = async (input: { iso: string; title: string; time: string }) => {
+    const local: HabitEvent = {
+      id: `event-${Date.now()}`,
+      iso: input.iso,
+      day: new Date(`${input.iso}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
+      date: String(new Date(`${input.iso}T00:00:00`).getDate()),
+      title: input.title,
+      time: input.time,
+      tone: 'teal',
+    };
+    if (!user) { setEvents((current) => [...current, local]); return; }
+    try {
+      const saved = await createEvent(input);
+      setEvents((current) => [...current, saved]);
+      setError('');
+    } catch (createError) {
+      setEvents((current) => [...current, local]);
+      setError(createError instanceof Error ? createError.message : 'Unable to save that event.');
+    }
+  };
+  const removeEvent = async (id: string) => {
+    const previous = events;
+    setEvents((current) => current.filter((item) => item.id !== id));
+    if (!user) return;
+    try {
+      await deleteEvent(id);
+    } catch (deleteError) {
+      setEvents(previous);
+      setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete that event.');
+    }
+  };
   const logout = async () => {
     await signOut();
     setUser(null);
@@ -977,6 +1105,9 @@ function DashboardPreview() {
     setEvents([]);
     setXp(0);
     setStreak(1);
+    setLastDoneOn(null);
+    setCelebrateLevel(null);
+    levelRef.current = 1;
     setLeaderboard([]);
     setLeaderboardError('');
     setView('dashboard');
@@ -992,7 +1123,8 @@ function DashboardPreview() {
   return <AppShell title={title} view={view} onView={setView}>
     <AuthPanel user={user} open={authOpen} onOpenChange={setAuthOpen} onAuthed={hydrate} onLogout={logout} />
     {error && <div className="mb-4 rounded-[12px] border border-coral/30 bg-coral/10 px-4 py-3 text-xs text-[#f2b3a8]" role="alert">{error}</div>}
-    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(event) => setEvents((current) => [...current, event])} onDelete={(id) => setEvents((current) => current.filter((item) => item.id !== id))} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} /> : <FocusView onSessionComplete={awardXp} />}
+    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(input) => void addEvent(input)} onDelete={(id) => void removeEvent(id)} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} /> : <FocusView onSessionComplete={awardXp} />}
+    {celebrateLevel !== null && <LevelUpCelebration level={celebrateLevel} onDismiss={() => setCelebrateLevel(null)} />}
   </AppShell>;
 }
 
@@ -1197,7 +1329,7 @@ function TasksView({ tasks, onToggle, onDelete, onAdd, showComposer, setShowComp
   </div>;
 }
 
-function CalendarView({ events, onAdd, onDelete }: { events: HabitEvent[]; onAdd: (event: HabitEvent) => void; onDelete: (id: string) => void }) {
+function CalendarView({ events, onAdd, onDelete }: { events: HabitEvent[]; onAdd: (input: { iso: string; title: string; time: string }) => void; onDelete: (id: string) => void }) {
   const today = new Date();
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [selected, setSelected] = useState(() => dayKey(today));
@@ -1222,15 +1354,7 @@ function CalendarView({ events, onAdd, onDelete }: { events: HabitEvent[]; onAdd
 
   const submit = () => {
     if (!title.trim()) return;
-    onAdd({
-      id: `event-${Date.now()}`,
-      iso: selected,
-      day: selectedDate.toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase(),
-      date: String(selectedDate.getDate()),
-      title: title.trim(),
-      time,
-      tone: 'teal',
-    });
+    onAdd({ iso: selected, title: title.trim(), time });
     setTitle('');
     setAdding(false);
   };
