@@ -924,7 +924,19 @@ function DashboardPreview() {
   const [showComposer, setShowComposer] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [error, setError] = useState('');
+  const [celebrateLevel, setCelebrateLevel] = useState<number | null>(null);
+  const [lastDoneOn, setLastDoneOn] = useState<string | null>(null);
+  const levelRef = useRef(1);
   const [, setLocation] = useLocation();
+
+  const commitXp = useCallback((value: number) => {
+    const nextXp = Math.max(0, value);
+    const nextLevel = Math.floor(nextXp / XP_PER_LEVEL) + 1;
+    if (nextLevel > levelRef.current) setCelebrateLevel(nextLevel);
+    levelRef.current = nextLevel;
+    setXp(nextXp);
+    return nextXp;
+  }, []);
 
   const loadLeaderboard = async () => {
     setLeaderboardLoading(true);
