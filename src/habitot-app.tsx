@@ -958,11 +958,21 @@ function DashboardPreview() {
       setUser(nextUser);
       setTasks(account.tasks);
       setProfile(account.profile);
-      setXp(Math.max(0, account.profile?.xp ?? 0));
-      const { streak: currentStreak, today } = nextStreak(account.profile);
+      const currentXp = Math.max(0, account.profile?.xp ?? 0);
+      levelRef.current = Math.floor(currentXp / XP_PER_LEVEL) + 1;
+      setXp(currentXp);
+      // The streak only counts days a task was actually finished: a full day
+      // with nothing finished drops it back to zero.
+      const { streak: currentStreak } = nextStreak(account.profile);
       setStreak(currentStreak);
-      if (currentStreak !== account.profile?.streak_days || account.profile?.last_active_on !== today) {
-        void saveProgress({ streakDays: currentStreak, lastActiveOn: today }).catch(() => undefined);
+      setLastDoneOn(account.profile?.last_active_on ?? null);
+      if (currentStreak !== (account.profile?.streak_days ?? 0)) {
+        void saveProgress({ streakDays: currentStreak }).catch(() => undefined);
+      }
+      try {
+        setEvents(await getEvents());
+      } catch {
+        setEvents([]);
       }
       setAuthOpen(false);
     } catch (loadError) {
