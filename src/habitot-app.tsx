@@ -1559,6 +1559,7 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
   const level = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
   const [pushState, setPushState] = useState<string>('');
   const [pushBusy, setPushBusy] = useState(false);
+  const [pushOn, setPushOn] = useState(false);
 
   const enableReminders = async () => {
     setPushBusy(true);
@@ -1566,13 +1567,30 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
     try {
       const { enablePush } = await import('@/lib/push');
       const result = await enablePush();
-      if (result.status === 'registered') setPushState('Reminders are on for this device, even when Habitot is closed.');
+      if (result.status === 'registered') {
+        setPushOn(true);
+        setPushState('Reminders are on for this device, even when Habitot is closed.');
+      }
       else if (result.status === 'open-in-new-tab') setPushState('Open Habitot in its own browser tab (not this small preview window) and try again.');
       else if (result.status === 'denied') setPushState('Your browser is blocking notifications. Allow them for this site in your browser settings.');
       else if (result.status === 'unsupported') setPushState('This device or browser cannot receive reminders.');
       else setPushState('Reminders are not set up yet on this app.');
     } catch (error) {
       setPushState(error instanceof Error ? error.message : 'Unable to turn on reminders.');
+    } finally {
+      setPushBusy(false);
+    }
+  };
+
+  const sendTestReminder = async () => {
+    setPushBusy(true);
+    setPushState('');
+    try {
+      const { sendReminder } = await import('@/lib/push.functions');
+      const result = await sendReminder({ data: { title: 'Habitot', body: 'Time for your next task. Keep the streak going.' } });
+      setPushState(result.sent > 0 ? `Sent to ${result.sent} device${result.sent === 1 ? '' : 's'}. Check your notifications.` : 'No devices are registered yet — turn on reminders first.');
+    } catch (error) {
+      setPushState(error instanceof Error ? error.message : 'Unable to send a test reminder.');
     } finally {
       setPushBusy(false);
     }
@@ -1608,8 +1626,11 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
 
     <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-reminders">
       <div className="flex items-center gap-2"><Bell className="size-4 text-flame" /><h3 className="font-display text-sm font-semibold">Reminders</h3></div>
-      <p className="mt-2 text-[12px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed.</p>
-      <button type="button" disabled={pushBusy} onClick={() => void enableReminders()} className="press mt-3 rounded-[10px] bg-flame px-4 py-2.5 text-xs font-semibold text-ink disabled:opacity-60" data-testid="button-enable-push">{pushBusy ? 'Working…' : 'Turn on reminders'}</button>
+      <p className="mt-2 text-[12px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed. On a phone, install Habitot to your home screen first, then turn reminders on.</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" disabled={pushBusy} onClick={() => void enableReminders()} className="press rounded-[10px] bg-flame px-4 py-2.5 text-xs font-semibold text-ink disabled:opacity-60" data-testid="button-enable-push">{pushBusy ? 'Working…' : pushOn ? 'Reminders on' : 'Turn on reminders'}</button>
+        <button type="button" disabled={pushBusy} onClick={() => void sendTestReminder()} className="press rounded-[10px] border border-line px-4 py-2.5 text-xs font-semibold text-cream hover:border-flame disabled:opacity-60" data-testid="button-test-push">Send a test</button>
+      </div>
       {pushState && <p className="mt-3 text-xs text-[#a49b8a]" role="status">{pushState}</p>}
     </section>
 
