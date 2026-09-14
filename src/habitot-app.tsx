@@ -341,6 +341,10 @@ function ProfileAvatar({ avatarUrl, name = 'M', size = 'size-12' }: { avatarUrl?
 
 function PublicIcon({ avatarUrl, size = 'size-11' }: { avatarUrl?: string | null | undefined; size?: string }) {
   const iconClass = 'size-5';
+  const isPhoto = typeof avatarUrl === 'string' && /^(https?:|data:|blob:)/.test(avatarUrl);
+  if (isPhoto) {
+    return <img src={avatarUrl as string} alt="" loading="lazy" referrerPolicy="no-referrer" className={`${size} shrink-0 rounded-[12px] object-cover ring-1 ring-line`} data-testid="img-public-avatar" />;
+  }
   const isLeaf = avatarUrl === 'builtin:leaf';
   const isMoon = avatarUrl === 'builtin:moon';
   const isSun = avatarUrl === 'builtin:sun';
@@ -348,6 +352,7 @@ function PublicIcon({ avatarUrl, size = 'size-11' }: { avatarUrl?: string | null
   const tone = isLeaf ? 'bg-teal/15 text-teal' : isMoon ? 'bg-sky/15 text-sky' : isSun ? 'bg-coral/15 text-coral' : 'bg-flame/15 text-flame';
   return <div className={`grid ${size} shrink-0 place-items-center rounded-[12px] ${tone}`} aria-hidden="true"><Icon className={iconClass} /></div>;
 }
+
 
 function Landing() {
   return (
