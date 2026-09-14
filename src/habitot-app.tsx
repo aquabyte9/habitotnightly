@@ -341,6 +341,10 @@ function ProfileAvatar({ avatarUrl, name = 'M', size = 'size-12' }: { avatarUrl?
 
 function PublicIcon({ avatarUrl, size = 'size-11' }: { avatarUrl?: string | null | undefined; size?: string }) {
   const iconClass = 'size-5';
+  const isPhoto = typeof avatarUrl === 'string' && /^(https?:|data:|blob:)/.test(avatarUrl);
+  if (isPhoto) {
+    return <img src={avatarUrl as string} alt="" loading="lazy" referrerPolicy="no-referrer" className={`${size} shrink-0 rounded-[12px] object-cover ring-1 ring-line`} data-testid="img-public-avatar" />;
+  }
   const isLeaf = avatarUrl === 'builtin:leaf';
   const isMoon = avatarUrl === 'builtin:moon';
   const isSun = avatarUrl === 'builtin:sun';
@@ -348,6 +352,7 @@ function PublicIcon({ avatarUrl, size = 'size-11' }: { avatarUrl?: string | null
   const tone = isLeaf ? 'bg-teal/15 text-teal' : isMoon ? 'bg-sky/15 text-sky' : isSun ? 'bg-coral/15 text-coral' : 'bg-flame/15 text-flame';
   return <div className={`grid ${size} shrink-0 place-items-center rounded-[12px] ${tone}`} aria-hidden="true"><Icon className={iconClass} /></div>;
 }
+
 
 function Landing() {
   return (
@@ -1660,8 +1665,48 @@ function ResetPasswordPage() {
 }
 
 function Router() {
-  return <RoutedErrorBoundary><Switch><Route path="/" component={Landing} /><Route path="/login" component={LoginPage} /><Route path="/onboarding" component={OnboardingPage} /><Route path="/app" component={DashboardPreview} /><Route path="/reset-password" component={ResetPasswordPage} /><Route component={NotFound} /></Switch></RoutedErrorBoundary>;
+  return <RoutedErrorBoundary><AuthReturnHandler /><Switch><Route path="/" component={Landing} /><Route path="/login" component={LoginPage} /><Route path="/onboarding" component={OnboardingPage} /><Route path="/app" component={DashboardPreview} /><Route path="/reset-password" component={ResetPasswordPage} /><Route component={NotFound} /></Switch></RoutedErrorBoundary>;
 }
+
+/** After Google or email sign-in returns to the site, clean the URL and send the person to the right page. */
+function AuthReturnHandler() {
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    const hash = window.location.hash;
+    const search = window.location.search;
+    const hasAuthReturn = hash.includes('access_token') || hash.includes('error_description') || /[?&]code=/.test(search);
+    if (!hasAuthReturn) return;
+
+    const cleanUrl = () => window.history.replaceState({}, '', window.location.pathname);
+
+    if (hash.includes('type=recovery')) {
+      cleanUrl();
+      setLocation('/reset-password');
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      for (let attempt = 0; attempt < 24 && !cancelled; attempt += 1) {
+        const session = await getSession().catch(() => null);
+        if (session) {
+          cleanUrl();
+          const account = await getAccount().catch(() => null);
+          if (!cancelled) setLocation(account?.profile?.onboarded ? '/app' : '/onboarding');
+          return;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 250));
+      }
+      if (!cancelled) {
+        cleanUrl();
+        setLocation('/login');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [setLocation]);
+  return null;
+}
+
 
 function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
