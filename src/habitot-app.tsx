@@ -1665,8 +1665,48 @@ function ResetPasswordPage() {
 }
 
 function Router() {
-  return <RoutedErrorBoundary><Switch><Route path="/" component={Landing} /><Route path="/login" component={LoginPage} /><Route path="/onboarding" component={OnboardingPage} /><Route path="/app" component={DashboardPreview} /><Route path="/reset-password" component={ResetPasswordPage} /><Route component={NotFound} /></Switch></RoutedErrorBoundary>;
+  return <RoutedErrorBoundary><AuthReturnHandler /><Switch><Route path="/" component={Landing} /><Route path="/login" component={LoginPage} /><Route path="/onboarding" component={OnboardingPage} /><Route path="/app" component={DashboardPreview} /><Route path="/reset-password" component={ResetPasswordPage} /><Route component={NotFound} /></Switch></RoutedErrorBoundary>;
 }
+
+/** After Google or email sign-in returns to the site, clean the URL and send the person to the right page. */
+function AuthReturnHandler() {
+  const [, setLocation] = useLocation();
+  useEffect(() => {
+    const hash = window.location.hash;
+    const search = window.location.search;
+    const hasAuthReturn = hash.includes('access_token') || hash.includes('error_description') || /[?&]code=/.test(search);
+    if (!hasAuthReturn) return;
+
+    const cleanUrl = () => window.history.replaceState({}, '', window.location.pathname);
+
+    if (hash.includes('type=recovery')) {
+      cleanUrl();
+      setLocation('/reset-password');
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      for (let attempt = 0; attempt < 24 && !cancelled; attempt += 1) {
+        const session = await getSession().catch(() => null);
+        if (session) {
+          cleanUrl();
+          const account = await getAccount().catch(() => null);
+          if (!cancelled) setLocation(account?.profile?.onboarded ? '/app' : '/onboarding');
+          return;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 250));
+      }
+      if (!cancelled) {
+        cleanUrl();
+        setLocation('/login');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [setLocation]);
+  return null;
+}
+
 
 function RoutedErrorBoundary({ children }: { children: ReactNode }) {
   const [location] = useLocation();
