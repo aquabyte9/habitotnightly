@@ -1626,8 +1626,11 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
 
     <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-reminders">
       <div className="flex items-center gap-2"><Bell className="size-4 text-flame" /><h3 className="font-display text-sm font-semibold">Reminders</h3></div>
-      <p className="mt-2 text-[12px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed.</p>
-      <button type="button" disabled={pushBusy} onClick={() => void enableReminders()} className="press mt-3 rounded-[10px] bg-flame px-4 py-2.5 text-xs font-semibold text-ink disabled:opacity-60" data-testid="button-enable-push">{pushBusy ? 'Working…' : 'Turn on reminders'}</button>
+      <p className="mt-2 text-[12px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed. On a phone, install Habitot to your home screen first, then turn reminders on.</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" disabled={pushBusy} onClick={() => void enableReminders()} className="press rounded-[10px] bg-flame px-4 py-2.5 text-xs font-semibold text-ink disabled:opacity-60" data-testid="button-enable-push">{pushBusy ? 'Working…' : pushOn ? 'Reminders on' : 'Turn on reminders'}</button>
+        <button type="button" disabled={pushBusy} onClick={() => void sendTestReminder()} className="press rounded-[10px] border border-line px-4 py-2.5 text-xs font-semibold text-cream hover:border-flame disabled:opacity-60" data-testid="button-test-push">Send a test</button>
+      </div>
       {pushState && <p className="mt-3 text-xs text-[#a49b8a]" role="status">{pushState}</p>}
     </section>
 
