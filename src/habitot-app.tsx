@@ -1559,6 +1559,7 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
   const level = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
   const [pushState, setPushState] = useState<string>('');
   const [pushBusy, setPushBusy] = useState(false);
+  const [pushOn, setPushOn] = useState(false);
 
   const enableReminders = async () => {
     setPushBusy(true);
@@ -1566,13 +1567,30 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
     try {
       const { enablePush } = await import('@/lib/push');
       const result = await enablePush();
-      if (result.status === 'registered') setPushState('Reminders are on for this device, even when Habitot is closed.');
+      if (result.status === 'registered') {
+        setPushOn(true);
+        setPushState('Reminders are on for this device, even when Habitot is closed.');
+      }
       else if (result.status === 'open-in-new-tab') setPushState('Open Habitot in its own browser tab (not this small preview window) and try again.');
       else if (result.status === 'denied') setPushState('Your browser is blocking notifications. Allow them for this site in your browser settings.');
       else if (result.status === 'unsupported') setPushState('This device or browser cannot receive reminders.');
       else setPushState('Reminders are not set up yet on this app.');
     } catch (error) {
       setPushState(error instanceof Error ? error.message : 'Unable to turn on reminders.');
+    } finally {
+      setPushBusy(false);
+    }
+  };
+
+  const sendTestReminder = async () => {
+    setPushBusy(true);
+    setPushState('');
+    try {
+      const { sendReminder } = await import('@/lib/push.functions');
+      const result = await sendReminder({ data: { title: 'Habitot', body: 'Time for your next task. Keep the streak going.' } });
+      setPushState(result.sent > 0 ? `Sent to ${result.sent} device${result.sent === 1 ? '' : 's'}. Check your notifications.` : 'No devices are registered yet — turn on reminders first.');
+    } catch (error) {
+      setPushState(error instanceof Error ? error.message : 'Unable to send a test reminder.');
     } finally {
       setPushBusy(false);
     }
