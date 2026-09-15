@@ -1,7 +1,7 @@
 # 🐾 Habitot
 
 **Keep the streak. Run your day.** 
-web url:https://habitot.lovable.app/app
+web url:https://habitotnightly.lovable.app/app
 tutorial (IMPORTANT): https://youtu.be/VmFr9wUx2qw
 
 Habitot is a habit and task companion designed to make small, everyday wins feel like they matter. Inspired by Duolingo's streak-driven momentum, it brings together task tracking, a calendar, and focus music into one warm, game-like dashboard — built to help you protect the small promises you make to yourself.
