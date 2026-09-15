@@ -551,7 +551,7 @@ function AppShell({ title, view, onView, children }: { title: string; view: View
 
   const navigateHome = () => setLocation('/');
   return (
-    <div className="grain min-h-[100dvh] bg-ink text-cream lg:flex">
+    <div className="grain app-shell min-h-[100dvh] bg-ink text-cream lg:flex">
       <aside className="sticky top-0 hidden h-[100dvh] w-[244px] shrink-0 flex-col border-r border-line bg-[#25211d] px-5 py-6 lg:flex">
         <button type="button" onClick={navigateHome} className="w-fit text-left" data-testid="button-sidebar-brand"><Wordmark /></button>
         <div className="mt-12 px-3 eyebrow text-[#736b60]">Your space</div>
@@ -560,7 +560,7 @@ function AppShell({ title, view, onView, children }: { title: string; view: View
         </nav>
         <div className="mt-auto space-y-2">
           <button type="button" onClick={() => setHelpOpen((open) => !open)} className="flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-sm text-[#9f9688] transition-colors hover:bg-[#332d26] hover:text-cream" data-testid="button-help"><CircleHelp className="size-4" /> How Habitot works</button>
-          {helpOpen && <div className="rounded-[12px] border border-line bg-[#332d26] p-3 text-[11px] leading-5 text-[#a49b8a]">A private-feeling daily companion. Check things off, notice the rhythm, and return tomorrow.</div>}
+          {helpOpen && <div className="rounded-[12px] border border-line bg-[#332d26] p-3 text-[12px] leading-5 text-[#a49b8a]">A private-feeling daily companion. Check things off, notice the rhythm, and return tomorrow.</div>}
         </div>
       </aside>
       <div className="min-w-0 flex-1 pb-24 lg:pb-8">
@@ -572,7 +572,7 @@ function AppShell({ title, view, onView, children }: { title: string; view: View
             <button type="button" onClick={() => setHelpOpen((open) => !open)} className="grid size-9 place-items-center rounded-full border border-line bg-[#29241f] text-[#aaa193] hover:text-cream" aria-label="How Habitot works" data-testid="button-header-help"><CircleHelp className="size-4" /></button>
           </div>
         </header>
-        {helpOpen && <div className="mx-auto mt-3 max-w-[1110px] px-5 sm:px-8 lg:px-10"><div className="flex items-start justify-between rounded-[12px] border border-teal/25 bg-teal/10 px-4 py-3 text-[12px] leading-5 text-[#b9cfc2]">Check off a task or switch sections — everything you do here is saved to your account.<button type="button" onClick={() => setHelpOpen(false)} className="ml-4 text-teal" aria-label="Dismiss note" data-testid="button-dismiss-help"><X className="size-4" /></button></div></div>}
+        {helpOpen && <div className="mx-auto mt-3 max-w-[1110px] px-5 sm:px-8 lg:px-10"><div className="flex items-start justify-between rounded-[12px] border border-teal/25 bg-teal/10 px-4 py-3 text-[13px] leading-5 text-[#b9cfc2]">Check off a task or switch sections — everything you do here is saved to your account.<button type="button" onClick={() => setHelpOpen(false)} className="ml-4 text-teal" aria-label="Dismiss note" data-testid="button-dismiss-help"><X className="size-4" /></button></div></div>}
         <main className="mx-auto max-w-[1110px] px-5 pt-5 sm:px-8 lg:px-10 lg:pt-7">{children}</main>
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-[#25211d]/95 pb-[max(.45rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md lg:hidden" aria-label="Mobile navigation">
@@ -620,7 +620,7 @@ function ProfileHeader({ streak, xp, name, avatarUrl }: { streak: number; xp: nu
     <div className="relative mt-6">
       <div className="mb-2 flex items-end justify-between">
         <span className="eyebrow text-muted-foreground">XP to level {level + 1}</span>
-        <span className="font-mono text-[11px] text-muted-foreground" data-testid="text-xp-progress">{Math.max(0, into)} / {goal}</span>
+        <span className="font-mono text-[12px] text-muted-foreground" data-testid="text-xp-progress">{Math.max(0, into)} / {goal}</span>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-raised">
         <div className="xp-bar-glow h-full rounded-full bg-gradient-to-r from-flame to-coral transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} data-testid="bar-xp" />
@@ -664,7 +664,7 @@ function AuthPanel({
 
   if (user) {
     const displayName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'friend';
-    return <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-teal/20 bg-teal/10 px-4 py-3 text-[12px] text-[#b9cfc2]" data-testid="status-authenticated">
+    return <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-teal/20 bg-teal/10 px-4 py-3 text-[13px] text-[#b9cfc2]" data-testid="status-authenticated">
       <span>Signed in as <strong className="font-medium text-cream">{displayName}</strong>. Your tasks follow you here.</span>
       <button type="button" onClick={() => void onLogout()} className="font-mono text-[10px] uppercase tracking-wider text-teal hover:text-cream" data-testid="button-logout">Sign out</button>
     </div>;
@@ -727,7 +727,7 @@ function AuthPanel({
 
   return <div className="mb-4 rounded-[14px] border border-flame/25 bg-flame/10 p-4" data-testid="panel-auth">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div><div className="eyebrow text-flame">{open ? (mode === 'login' ? 'Welcome back' : 'Make it yours') : 'Welcome'}</div><p className="mt-1 text-[12px] text-[#b9aa96]">{open ? 'Save your tasks and return to them on any device.' : 'Sign in to keep your tasks, streak, and progress.'}</p></div>
+      <div><div className="eyebrow text-flame">{open ? (mode === 'login' ? 'Welcome back' : 'Make it yours') : 'Welcome'}</div><p className="mt-1 text-[13px] text-[#b9aa96]">{open ? 'Save your tasks and return to them on any device.' : 'Sign in to keep your tasks, streak, and progress.'}</p></div>
       <button type="button" onClick={() => { onOpenChange(!open); setMessage(''); }} className="rounded-[9px] border border-flame/35 px-3 py-2 text-xs font-semibold text-flame hover:bg-flame/10" data-testid="button-auth-toggle">{open ? 'Close' : 'Sign in or sign up'}</button>
     </div>
     {open && <div className="mt-4 border-t border-flame/15 pt-4">
@@ -1188,7 +1188,7 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
   const xp = Math.max(0, Math.floor(Number(entry.xp ?? 0)));
   const streak = Math.max(0, Math.floor(Number(entry.streak_days ?? 0)));
   return <div className="flex items-center gap-3 border-b border-line px-4 py-3.5 last:border-b-0 sm:gap-4 sm:px-5" data-testid={`row-leaderboard-${rank}`}>
-    <span className="w-6 shrink-0 text-center font-mono text-[11px] text-[#82796d]" aria-label={`Rank ${rank}`}>{String(rank).padStart(2, '0')}</span>
+    <span className="w-6 shrink-0 text-center font-mono text-[12px] text-[#82796d]" aria-label={`Rank ${rank}`}>{String(rank).padStart(2, '0')}</span>
     <PublicIcon avatarUrl={entry.avatar_url} />
     <div className="min-w-0 flex-1">
       <div className="truncate text-sm font-medium" data-testid={`text-leaderboard-name-${rank}`}>{displayName}</div>
@@ -1525,16 +1525,16 @@ function FocusView({ onSessionComplete }: { onSessionComplete: (xp: number) => v
 
     <section className="rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid="card-music">
       <div className="flex items-center gap-2"><Music2 className="size-4 text-teal" /><h3 className="font-display text-sm font-semibold">Bring your own sound</h3></div>
-      <p className="mt-2 text-[12px] leading-5 text-[#9f9688]">Paste a YouTube Music, Spotify, or direct audio link. It keeps playing while you move between tabs.</p>
+      <p className="mt-2 text-[13px] leading-5 text-[#9f9688]">Paste a YouTube Music, Spotify, or direct audio link. It keeps playing while you move between tabs.</p>
       <form className="mt-3 flex flex-col gap-2 sm:flex-row" onSubmit={(event) => { event.preventDefault(); if (load(link)) setLink(''); }}>
         <input value={link} onChange={(event) => setLink(event.target.value)} placeholder="https://open.spotify.com/… or https://music.youtube.com/…" className="min-w-0 flex-1 rounded-[10px] border border-line bg-[#2a241f] px-3 py-2.5 text-sm text-cream outline-none focus:border-flame" data-testid="input-music-link" />
         <button type="submit" className="press rounded-[10px] bg-teal px-4 py-2.5 text-xs font-semibold text-ink" data-testid="button-music-play">Play it</button>
       </form>
       {error && <p className="mt-2 text-xs text-coral" role="alert">{error}</p>}
-      {track && <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-[#a49b8a]">
+      {track && <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-[#a49b8a]">
         <span className="truncate">Now playing · {track.title}</span>
-        {track.kind === 'audio' && <button type="button" onClick={toggle} className="press rounded-[9px] border border-line px-3 py-1.5 text-[11px] text-cream" data-testid="button-music-toggle">{playing ? 'Pause' : 'Play'}</button>}
-        <button type="button" onClick={stop} className="press rounded-[9px] border border-line px-3 py-1.5 text-[11px] text-cream" data-testid="button-music-stop">Stop</button>
+        {track.kind === 'audio' && <button type="button" onClick={toggle} className="press rounded-[9px] border border-line px-3 py-1.5 text-[12px] text-cream" data-testid="button-music-toggle">{playing ? 'Pause' : 'Play'}</button>}
+        <button type="button" onClick={stop} className="press rounded-[9px] border border-line px-3 py-1.5 text-[12px] text-cream" data-testid="button-music-stop">Stop</button>
       </div>}
     </section>
 
@@ -1604,7 +1604,7 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
         <ProfileAvatar avatarUrl={avatarUrl} name={name} />
         <div className="min-w-0">
           <div className="font-display text-xl font-semibold tracking-[-.04em]" data-testid="text-profile-display-name">{name}</div>
-          <div className="mt-1 truncate text-[12px] text-[#a49b8a]">{email}</div>
+          <div className="mt-1 truncate text-[13px] text-[#a49b8a]">{email}</div>
         </div>
         <Link href="/onboarding" className="press ml-auto rounded-[10px] border border-line px-3.5 py-2 text-xs font-semibold text-cream hover:border-flame" data-testid="link-edit-profile">Edit details</Link>
       </div>
@@ -1619,14 +1619,14 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
     <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-appearance">
       <h3 className="font-display text-sm font-semibold">Appearance</h3>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3"><ThemeSwitch /><span className="text-[12px] text-[#a49b8a]">Light or dark</span></div>
-        <div className="flex items-center gap-3"><AccentPicker /><span className="text-[12px] text-[#a49b8a]">Accent colour</span></div>
+        <div className="flex items-center gap-3"><ThemeSwitch /><span className="text-[13px] text-[#a49b8a]">Light or dark</span></div>
+        <div className="flex items-center gap-3"><AccentPicker /><span className="text-[13px] text-[#a49b8a]">Accent colour</span></div>
       </div>
     </section>
 
     <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-reminders">
       <div className="flex items-center gap-2"><Bell className="size-4 text-flame" /><h3 className="font-display text-sm font-semibold">Reminders</h3></div>
-      <p className="mt-2 text-[12px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed. On a phone, install Habitot to your home screen first, then turn reminders on.</p>
+      <p className="mt-2 text-[13px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed. On a phone, install Habitot to your home screen first, then turn reminders on.</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" disabled={pushBusy} onClick={() => void enableReminders()} className="press rounded-[10px] bg-flame px-4 py-2.5 text-xs font-semibold text-ink disabled:opacity-60" data-testid="button-enable-push">{pushBusy ? 'Working…' : pushOn ? 'Reminders on' : 'Turn on reminders'}</button>
         <button type="button" disabled={pushBusy} onClick={() => void sendTestReminder()} className="press rounded-[10px] border border-line px-4 py-2.5 text-xs font-semibold text-cream hover:border-flame disabled:opacity-60" data-testid="button-test-push">Send a test</button>
