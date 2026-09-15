@@ -560,7 +560,7 @@ function AppShell({ title, view, onView, children }: { title: string; view: View
         </nav>
         <div className="mt-auto space-y-2">
           <button type="button" onClick={() => setHelpOpen((open) => !open)} className="flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-sm text-[#9f9688] transition-colors hover:bg-[#332d26] hover:text-cream" data-testid="button-help"><CircleHelp className="size-4" /> How Habitot works</button>
-          {helpOpen && <div className="rounded-[12px] border border-line bg-[#332d26] p-3 text-[12px] leading-5 text-[#a49b8a]">A private-feeling daily companion. Check things off, notice the rhythm, and return tomorrow.</div>}
+          {helpOpen && <div className="rounded-[12px] border border-line bg-[#332d26] p-3 text-[14px] leading-5 text-[#a49b8a]">A private-feeling daily companion. Check things off, notice the rhythm, and return tomorrow.</div>}
         </div>
       </aside>
       <div className="min-w-0 flex-1 pb-24 lg:pb-8">
@@ -572,7 +572,7 @@ function AppShell({ title, view, onView, children }: { title: string; view: View
             <button type="button" onClick={() => setHelpOpen((open) => !open)} className="grid size-9 place-items-center rounded-full border border-line bg-[#29241f] text-[#aaa193] hover:text-cream" aria-label="How Habitot works" data-testid="button-header-help"><CircleHelp className="size-4" /></button>
           </div>
         </header>
-        {helpOpen && <div className="mx-auto mt-3 max-w-[1110px] px-5 sm:px-8 lg:px-10"><div className="flex items-start justify-between rounded-[12px] border border-teal/25 bg-teal/10 px-4 py-3 text-[13px] leading-5 text-[#b9cfc2]">Check off a task or switch sections — everything you do here is saved to your account.<button type="button" onClick={() => setHelpOpen(false)} className="ml-4 text-teal" aria-label="Dismiss note" data-testid="button-dismiss-help"><X className="size-4" /></button></div></div>}
+        {helpOpen && <div className="mx-auto mt-3 max-w-[1110px] px-5 sm:px-8 lg:px-10"><div className="flex items-start justify-between rounded-[12px] border border-teal/25 bg-teal/10 px-4 py-3 text-[15px] leading-5 text-[#b9cfc2]">Check off a task or switch sections — everything you do here is saved to your account.<button type="button" onClick={() => setHelpOpen(false)} className="ml-4 text-teal" aria-label="Dismiss note" data-testid="button-dismiss-help"><X className="size-4" /></button></div></div>}
         <main className="mx-auto max-w-[1110px] px-5 pt-5 sm:px-8 lg:px-10 lg:pt-7">{children}</main>
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-[#25211d]/95 pb-[max(.45rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md lg:hidden" aria-label="Mobile navigation">
@@ -584,7 +584,7 @@ function AppShell({ title, view, onView, children }: { title: string; view: View
 
 function NavButton({ item, active, onClick, desktop = false }: { item: (typeof navItems)[number]; active: boolean; onClick: () => void; desktop?: boolean }) {
   const Icon = item.icon;
-  return <button type="button" onClick={onClick} className={`press flex ${desktop ? 'w-full flex-row gap-3 px-3 py-2.5 text-sm' : 'w-full flex-col justify-center gap-1 px-2 py-1.5 text-[10px]'} items-center rounded-[11px] font-medium transition-colors ${active ? 'bg-flame/12 text-flame' : 'text-[#91887b] hover:bg-[#332d26] hover:text-cream'}`} aria-current={active ? 'page' : undefined} data-testid={`button-nav-${item.id}`}><Icon className={`size-4 ${active ? 'nav-pop' : ''}`} /><span className="whitespace-nowrap">{item.label}</span></button>;
+  return <button type="button" onClick={onClick} className={`press flex ${desktop ? 'w-full flex-row gap-3 px-3 py-2.5 text-sm' : 'w-full flex-col justify-center gap-1 px-2 py-1.5 text-[12px]'} items-center rounded-[11px] font-medium transition-colors ${active ? 'bg-flame/12 text-flame' : 'text-[#91887b] hover:bg-[#332d26] hover:text-cream'}`} aria-current={active ? 'page' : undefined} data-testid={`button-nav-${item.id}`}><Icon className={`size-4 ${active ? 'nav-pop' : ''}`} /><span className="whitespace-nowrap">{item.label}</span></button>;
 }
 
 const XP_PER_LEVEL = 100;
@@ -605,7 +605,7 @@ function ProfileHeader({ streak, xp, name, avatarUrl }: { streak: number; xp: nu
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <div className="font-display text-base font-semibold" data-testid="text-profile-name">{name}</div>
-          <span className="rounded-full bg-flame/10 px-2 py-0.5 font-mono text-[10px] font-medium text-flame">Lvl {level}</span>
+          <span className="rounded-full bg-flame/10 px-2 py-0.5 font-mono text-[12px] font-medium text-flame">Lvl {level}</span>
         </div>
         <div className="eyebrow mt-1 text-muted-foreground">finding momentum</div>
       </div>
@@ -620,7 +620,7 @@ function ProfileHeader({ streak, xp, name, avatarUrl }: { streak: number; xp: nu
     <div className="relative mt-6">
       <div className="mb-2 flex items-end justify-between">
         <span className="eyebrow text-muted-foreground">XP to level {level + 1}</span>
-        <span className="font-mono text-[12px] text-muted-foreground" data-testid="text-xp-progress">{Math.max(0, into)} / {goal}</span>
+        <span className="font-mono text-[14px] text-muted-foreground" data-testid="text-xp-progress">{Math.max(0, into)} / {goal}</span>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-raised">
         <div className="xp-bar-glow h-full rounded-full bg-gradient-to-r from-flame to-coral transition-[width] duration-700 ease-out" style={{ width: `${pct}%` }} data-testid="bar-xp" />
@@ -664,9 +664,9 @@ function AuthPanel({
 
   if (user) {
     const displayName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'friend';
-    return <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-teal/20 bg-teal/10 px-4 py-3 text-[13px] text-[#b9cfc2]" data-testid="status-authenticated">
+    return <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-teal/20 bg-teal/10 px-4 py-3 text-[15px] text-[#b9cfc2]" data-testid="status-authenticated">
       <span>Signed in as <strong className="font-medium text-cream">{displayName}</strong>. Your tasks follow you here.</span>
-      <button type="button" onClick={() => void onLogout()} className="font-mono text-[10px] uppercase tracking-wider text-teal hover:text-cream" data-testid="button-logout">Sign out</button>
+      <button type="button" onClick={() => void onLogout()} className="font-mono text-[12px] uppercase tracking-wider text-teal hover:text-cream" data-testid="button-logout">Sign out</button>
     </div>;
   }
 
@@ -727,22 +727,22 @@ function AuthPanel({
 
   return <div className="mb-4 rounded-[14px] border border-flame/25 bg-flame/10 p-4" data-testid="panel-auth">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div><div className="eyebrow text-flame">{open ? (mode === 'login' ? 'Welcome back' : 'Make it yours') : 'Welcome'}</div><p className="mt-1 text-[13px] text-[#b9aa96]">{open ? 'Save your tasks and return to them on any device.' : 'Sign in to keep your tasks, streak, and progress.'}</p></div>
+      <div><div className="eyebrow text-flame">{open ? (mode === 'login' ? 'Welcome back' : 'Make it yours') : 'Welcome'}</div><p className="mt-1 text-[15px] text-[#b9aa96]">{open ? 'Save your tasks and return to them on any device.' : 'Sign in to keep your tasks, streak, and progress.'}</p></div>
       <button type="button" onClick={() => { onOpenChange(!open); setMessage(''); }} className="rounded-[9px] border border-flame/35 px-3 py-2 text-xs font-semibold text-flame hover:bg-flame/10" data-testid="button-auth-toggle">{open ? 'Close' : 'Sign in or sign up'}</button>
     </div>
     {open && <div className="mt-4 border-t border-flame/15 pt-4">
-      <div className="mb-3 flex gap-4 font-mono text-[10px] uppercase tracking-wider"><button type="button" onClick={() => { setMode('login'); setMessage(''); }} className={mode === 'login' ? 'text-flame' : 'text-[#8d8171]'}>Sign in</button><button type="button" onClick={() => { setMode('signup'); setMessage(''); }} className={mode === 'signup' ? 'text-flame' : 'text-[#8d8171]'}>Create account</button></div>
+      <div className="mb-3 flex gap-4 font-mono text-[12px] uppercase tracking-wider"><button type="button" onClick={() => { setMode('login'); setMessage(''); }} className={mode === 'login' ? 'text-flame' : 'text-[#8d8171]'}>Sign in</button><button type="button" onClick={() => { setMode('signup'); setMessage(''); }} className={mode === 'signup' ? 'text-flame' : 'text-[#8d8171]'}>Create account</button></div>
       <form className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]" onSubmit={(event) => { event.preventDefault(); void submit(); }}>
         {mode === 'signup' && <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" autoComplete="name" className="rounded-[9px] border border-line bg-[#2a241f] px-3 py-2 text-sm text-cream outline-none focus:border-flame" data-testid="input-auth-name" />}
         <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="Email address" type="email" required autoComplete="email" className="rounded-[9px] border border-line bg-[#2a241f] px-3 py-2 text-sm text-cream outline-none focus:border-flame" data-testid="input-auth-email" />
         <input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password (8+ characters)" type="password" required minLength={8} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} className="rounded-[9px] border border-line bg-[#2a241f] px-3 py-2 text-sm text-cream outline-none focus:border-flame" data-testid="input-auth-password" />
         <button type="submit" disabled={busy} className="press rounded-[9px] bg-flame px-4 py-2 text-xs font-semibold text-ink disabled:opacity-60" data-testid="button-auth-submit">{busy ? 'Working…' : mode === 'login' ? 'Sign in' : 'Create account'}</button>
       </form>
-      <div className="mt-4 flex items-center gap-3 text-[10px] uppercase tracking-wider text-[#8d8171]"><span className="h-px flex-1 bg-flame/20" />or<span className="h-px flex-1 bg-flame/20" /></div>
+      <div className="mt-4 flex items-center gap-3 text-[12px] uppercase tracking-wider text-[#8d8171]"><span className="h-px flex-1 bg-flame/20" />or<span className="h-px flex-1 bg-flame/20" /></div>
       <button type="button" disabled={busy} onClick={() => void google()} className="press mt-4 flex w-full items-center justify-center gap-3 rounded-[10px] border border-line bg-[#2a241f] px-4 py-2.5 text-sm font-semibold text-cream hover:border-flame disabled:opacity-60" data-testid="button-google-signin">
         <GoogleGlyph /> Continue with Google
       </button>
-      {mode === 'login' && <button type="button" onClick={() => void forgot()} className="mt-3 font-mono text-[10px] uppercase tracking-wider text-[#a49b8a] hover:text-flame" data-testid="button-forgot-password">Forgot your password?</button>}
+      {mode === 'login' && <button type="button" onClick={() => void forgot()} className="mt-3 font-mono text-[12px] uppercase tracking-wider text-[#a49b8a] hover:text-flame" data-testid="button-forgot-password">Forgot your password?</button>}
       {message && <p className="mt-3 text-xs text-[#d8a76f]" role="status">{message}</p>}
     </div>}
   </div>;
@@ -817,7 +817,7 @@ function OnboardingPage() {
         {step === 1 && <div className="mt-8"><h1 className="font-display text-3xl font-semibold tracking-[-.06em]">What should we call you?</h1><p className="mt-2 text-sm text-[#9f9688]">This stays in your private profile.</p><input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Your name" className="mt-7 w-full rounded-[10px] border border-line bg-[#2a241f] px-4 py-3 text-cream outline-none focus:border-teal" data-testid="input-onboarding-name" /></div>}
         {step === 2 && <div className="mt-8"><h1 className="font-display text-3xl font-semibold tracking-[-.06em]">A little body context</h1><p className="mt-2 text-sm text-[#9f9688]">Optional in spirit, private by design, and only used for your space.</p><div className="mt-7 grid gap-3 sm:grid-cols-2"><label className="text-xs text-[#a49b8a]">Height (cm)<input value={height} onChange={(event) => setHeight(event.target.value)} type="number" min="40" max="260" placeholder="170" className="mt-2 w-full rounded-[10px] border border-line bg-[#2a241f] px-4 py-3 text-cream outline-none focus:border-teal" /></label><label className="text-xs text-[#a49b8a]">Weight (kg)<input value={weight} onChange={(event) => setWeight(event.target.value)} type="number" min="20" max="400" placeholder="65" className="mt-2 w-full rounded-[10px] border border-line bg-[#2a241f] px-4 py-3 text-cream outline-none focus:border-teal" /></label></div></div>}
         {step === 3 && <div className="mt-8"><h1 className="font-display text-3xl font-semibold tracking-[-.06em]">What are you making room for?</h1><p className="mt-2 text-sm text-[#9f9688]">Choose what feels useful today. You can change this later.</p><div className="mt-7 grid gap-2 sm:grid-cols-2">{['More energy', 'A calmer mind', 'Creative work', 'Better sleep', 'Movement', 'Showing up for myself'].map((goal) => <button key={goal} type="button" onClick={() => setGoals((current) => current.includes(goal) ? current.filter((item) => item !== goal) : [...current, goal])} className={`rounded-[10px] border px-4 py-3 text-left text-sm transition-colors ${goals.includes(goal) ? 'border-teal bg-teal/15 text-cream' : 'border-line bg-[#2a241f] text-[#a49b8a] hover:border-teal/50'}`}>{goal}</button>)}</div></div>}
-        {step === 4 && <div className="mt-8"><h1 className="font-display text-3xl font-semibold tracking-[-.06em]">Choose your little mark</h1><p className="mt-2 text-sm text-[#9f9688]">Pick an icon or upload your own private profile picture.</p><div className="mt-7 flex flex-wrap gap-3">{avatarPresets.map((item) => <button key={item.id} type="button" onClick={() => setAvatar(`builtin:${item.id}`)} className={`rounded-[14px] border p-2 ${avatar === `builtin:${item.id}` ? 'border-flame' : 'border-line'}`} aria-label={item.label}><ProfileAvatar avatarUrl={`builtin:${item.id}`} size="size-14" /></button>)}<label className="grid size-[76px] cursor-pointer place-items-center rounded-[14px] border border-dashed border-line text-center text-[10px] text-[#a49b8a] hover:border-flame"><span>Upload<br />photo</span><input type="file" accept="image/*" className="hidden" onChange={async (event) => { const file = event.target.files?.[0]; if (!file) return; setBusy(true); try { const objectPath = await requestAvatarUpload(file); setAvatar(objectPath); } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to upload that image.'); } finally { setBusy(false); } }} /></label></div><div className="mt-6 flex items-center gap-3"><ProfileAvatar avatarUrl={avatar} name={name} size="size-14" /><span className="text-sm text-[#b9aa96]">This is how you’ll appear in your private space.</span></div></div>}
+        {step === 4 && <div className="mt-8"><h1 className="font-display text-3xl font-semibold tracking-[-.06em]">Choose your little mark</h1><p className="mt-2 text-sm text-[#9f9688]">Pick an icon or upload your own private profile picture.</p><div className="mt-7 flex flex-wrap gap-3">{avatarPresets.map((item) => <button key={item.id} type="button" onClick={() => setAvatar(`builtin:${item.id}`)} className={`rounded-[14px] border p-2 ${avatar === `builtin:${item.id}` ? 'border-flame' : 'border-line'}`} aria-label={item.label}><ProfileAvatar avatarUrl={`builtin:${item.id}`} size="size-14" /></button>)}<label className="grid size-[76px] cursor-pointer place-items-center rounded-[14px] border border-dashed border-line text-center text-[12px] text-[#a49b8a] hover:border-flame"><span>Upload<br />photo</span><input type="file" accept="image/*" className="hidden" onChange={async (event) => { const file = event.target.files?.[0]; if (!file) return; setBusy(true); try { const objectPath = await requestAvatarUpload(file); setAvatar(objectPath); } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to upload that image.'); } finally { setBusy(false); } }} /></label></div><div className="mt-6 flex items-center gap-3"><ProfileAvatar avatarUrl={avatar} name={name} size="size-14" /><span className="text-sm text-[#b9aa96]">This is how you’ll appear in your private space.</span></div></div>}
         {message && <p className="mt-5 text-xs text-coral" role="alert">{message}</p>}
         <div className="mt-8 flex justify-between"><button type="button" onClick={() => step > 1 && setStep((current) => current - 1)} className="text-sm text-[#9f9688] hover:text-cream">{step > 1 ? 'Back' : 'Sign out'}</button><button type="button" onClick={next} disabled={busy} className="press rounded-[10px] bg-flame px-5 py-3 text-sm font-semibold text-ink disabled:opacity-60">{busy ? 'Saving…' : step === 4 ? 'Enter Habitot' : 'Continue'}</button></div>
       </div>
@@ -874,7 +874,7 @@ function BootScreen({ label = 'Making room for your day' }: { label?: string }) 
     <div className="w-full max-w-[300px] text-center">
       <MascotMark className="mx-auto size-16 float-slow" />
       <div className="mt-6 font-display text-xl font-semibold tracking-[-.04em]">Habitot</div>
-      <p className="mt-2 font-mono text-[10px] uppercase tracking-[.18em] text-[#82796d]">{label}</p>
+      <p className="mt-2 font-mono text-[12px] uppercase tracking-[.18em] text-[#82796d]">{label}</p>
       <div className="mt-7 h-1.5 overflow-hidden rounded-full bg-[#433b32]"><div className="boot-progress h-full rounded-full bg-flame" /></div>
     </div>
   </main>;
@@ -933,7 +933,7 @@ function LevelUpCelebration({ level, onDismiss }: { level: number; onDismiss: ()
       <div className="levelup-rise eyebrow mt-6 text-flame" style={{ animationDelay: '.1s' }}>Level up</div>
       <div className="levelup-number mt-2 font-display text-[92px] font-semibold leading-none tracking-[-.07em] text-flame drop-shadow-[0_0_28px_rgba(243,180,100,.45)]" data-testid="text-level-up-number">{level}</div>
       <p className="levelup-rise mt-4 text-sm leading-6 text-[#d8cdbc]" style={{ animationDelay: '.22s' }}>That is a whole new level of you. Keep the streak going.</p>
-      <div className="levelup-rise mt-6 font-mono text-[10px] uppercase tracking-[.18em] text-[#a49b8a]" style={{ animationDelay: '.3s' }}>Tap anywhere to continue</div>
+      <div className="levelup-rise mt-6 font-mono text-[12px] uppercase tracking-[.18em] text-[#a49b8a]" style={{ animationDelay: '.3s' }}>Tap anywhere to continue</div>
     </div>
   </div>;
 }
@@ -1164,7 +1164,7 @@ function LeaderboardView({ entries, loading, error, onRetry }: { entries: Leader
       <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-.06em]">See the good work around you.</h2>
       <p className="mt-2 max-w-[560px] text-sm leading-6 text-[#9f9688]">A gentle look at momentum from people who have chosen to share it. Only public profile details appear here.</p>
     </div>
-    {error && <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-coral/30 bg-coral/10 px-4 py-3 text-xs text-[#f2b3a8]" role="alert" data-testid="status-leaderboard-error"><span>{error}</span><button type="button" onClick={onRetry} className="font-mono text-[10px] uppercase tracking-wider text-coral hover:text-cream" data-testid="button-retry-leaderboard">Try again</button></div>}
+    {error && <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-coral/30 bg-coral/10 px-4 py-3 text-xs text-[#f2b3a8]" role="alert" data-testid="status-leaderboard-error"><span>{error}</span><button type="button" onClick={onRetry} className="font-mono text-[12px] uppercase tracking-wider text-coral hover:text-cream" data-testid="button-retry-leaderboard">Try again</button></div>}
     {loading ? <LeaderboardLoading /> : entries.length === 0 ? <LeaderboardEmpty /> : <section className="overflow-hidden rounded-[16px] border border-line bg-surface" aria-label="Habitot leaderboard" data-testid="list-leaderboard">{entries.map((entry, index) => <LeaderboardRow key={index} entry={entry} rank={index + 1} />)}</section>}
   </div>;
 }
@@ -1188,7 +1188,7 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
   const xp = Math.max(0, Math.floor(Number(entry.xp ?? 0)));
   const streak = Math.max(0, Math.floor(Number(entry.streak_days ?? 0)));
   return <div className="flex items-center gap-3 border-b border-line px-4 py-3.5 last:border-b-0 sm:gap-4 sm:px-5" data-testid={`row-leaderboard-${rank}`}>
-    <span className="w-6 shrink-0 text-center font-mono text-[12px] text-[#82796d]" aria-label={`Rank ${rank}`}>{String(rank).padStart(2, '0')}</span>
+    <span className="w-6 shrink-0 text-center font-mono text-[14px] text-[#82796d]" aria-label={`Rank ${rank}`}>{String(rank).padStart(2, '0')}</span>
     <PublicIcon avatarUrl={entry.avatar_url} />
     <div className="min-w-0 flex-1">
       <div className="truncate text-sm font-medium" data-testid={`text-leaderboard-name-${rank}`}>{displayName}</div>
@@ -1259,18 +1259,18 @@ function Overview({ tasks, events, xp, streak, name, avatarUrl, onToggle, onDele
     </div>
     <div className="grid gap-4 lg:grid-cols-[1.16fr_.84fr]">
       <section className="rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid="card-today-tasks">
-        <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-coral" /><h2 className="font-display text-sm font-semibold">Today's tasks</h2></div><button type="button" onClick={() => onView('tasks')} className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[#91887b] hover:text-flame" data-testid="button-view-all-tasks">View all <ChevronRight className="size-3" /></button></div>
+        <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-coral" /><h2 className="font-display text-sm font-semibold">Today's tasks</h2></div><button type="button" onClick={() => onView('tasks')} className="flex items-center gap-1 font-mono text-[12px] uppercase tracking-wider text-[#91887b] hover:text-flame" data-testid="button-view-all-tasks">View all <ChevronRight className="size-3" /></button></div>
         <div className="space-y-1">{todaysTasks.slice(0, 4).map((task) => <TaskRow key={task.id} task={task} onToggle={onToggle} onDelete={onDelete} />)}</div>
         {todaysTasks.length === 0 && <EmptyState icon={<ListChecks className="size-5" />} title="A clear slate" copy="Add one small thing to begin." action="Add a task" onClick={() => onView('tasks')} />}
-        <div className="mt-4 border-t border-line pt-3 text-right font-mono text-[10px] text-[#82796d]">{todaysDone} of {todaysTasks.length} complete today · {todaysTasks.reduce((sum, task) => sum + (task.done ? task.xp : 0), 0)} XP earned</div>
+        <div className="mt-4 border-t border-line pt-3 text-right font-mono text-[12px] text-[#82796d]">{todaysDone} of {todaysTasks.length} complete today · {todaysTasks.reduce((sum, task) => sum + (task.done ? task.xp : 0), 0)} XP earned</div>
       </section>
       <section className="rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid="card-upcoming-events">
-        <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-teal" /><h2 className="font-display text-sm font-semibold">Coming up</h2></div><button type="button" onClick={() => onView('calendar')} className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[#91887b] hover:text-flame" data-testid="button-view-calendar">Calendar <ChevronRight className="size-3" /></button></div>
+        <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-teal" /><h2 className="font-display text-sm font-semibold">Coming up</h2></div><button type="button" onClick={() => onView('calendar')} className="flex items-center gap-1 font-mono text-[12px] uppercase tracking-wider text-[#91887b] hover:text-flame" data-testid="button-view-calendar">Calendar <ChevronRight className="size-3" /></button></div>
         {events.length ? events.slice(0, 3).map((event, index) => <EventRow key={event.id} event={event} last={index === Math.min(events.length, 3) - 1} />) : <EmptyState icon={<CalendarDays className="size-5" />} title="Nothing on the horizon" copy="A little spacious. Add an event when you're ready." action="Open calendar" onClick={() => onView('calendar')} />}
       </section>
     </div>
     <div className="grid gap-4 lg:grid-cols-[.9fr_1.1fr]">
-      <section className="rounded-[16px] border border-line bg-[#332d26] p-5" data-testid="card-companion"><div className="flex items-start justify-between"><div><div className="eyebrow text-flame">A note from your companion</div><p className="mt-4 max-w-[260px] font-display text-xl font-medium leading-tight">You don't need a perfect day. Just a next thing.</p></div><MascotMark className="size-14 float-slow" /></div><button type="button" onClick={() => onView('focus')} className="mt-6 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-flame" data-testid="button-start-focus">Make some room <ArrowRight className="size-3.5" /></button></section>
+      <section className="rounded-[16px] border border-line bg-[#332d26] p-5" data-testid="card-companion"><div className="flex items-start justify-between"><div><div className="eyebrow text-flame">A note from your companion</div><p className="mt-4 max-w-[260px] font-display text-xl font-medium leading-tight">You don't need a perfect day. Just a next thing.</p></div><MascotMark className="size-14 float-slow" /></div><button type="button" onClick={() => onView('focus')} className="mt-6 flex items-center gap-2 font-mono text-[12px] uppercase tracking-wider text-flame" data-testid="button-start-focus">Make some room <ArrowRight className="size-3.5" /></button></section>
       <RhythmCard tasks={tasks} />
     </div>
   </div>;
@@ -1287,11 +1287,11 @@ function TaskRow({ task, onToggle, onDelete }: { task: HabitTask; onToggle: (id:
     <button type="button" aria-pressed={task.done} aria-label={`${task.done ? 'Mark incomplete' : 'Mark complete'}: ${task.title}`} onClick={() => onToggle(task.id)} className={`grid size-5 shrink-0 place-items-center rounded-[5px] border-2 transition-colors ${task.done ? 'border-coral bg-coral text-ink' : 'border-[#675b4c] hover:border-coral'}`} data-testid={`button-toggle-task-${task.id}`}>{task.done && <Check className="check-pop size-3.5" strokeWidth={3} />}</button>
     <span className={`min-w-0 flex-1 text-sm ${task.done ? 'strike-line' : ''}`}>{task.title}</span>
     <span className="hidden font-mono text-[9px] uppercase text-[#82796d] sm:inline">{task.time}</span>
-    <span className="font-mono text-[10px] text-flame">+{task.xp}</span>
+    <span className="font-mono text-[12px] text-flame">+{task.xp}</span>
     {onDelete && (confirming
       ? <span className="flex shrink-0 items-center gap-1">
-        <button type="button" onClick={() => { setConfirming(false); onDelete(task.id); }} className="press rounded-[8px] bg-coral px-2 py-1 text-[10px] font-semibold text-ink" data-testid={`button-confirm-delete-task-${task.id}`}>Delete</button>
-        <button type="button" onClick={() => setConfirming(false)} className="press rounded-[8px] border border-line px-2 py-1 text-[10px] text-[#a49b8a]" data-testid={`button-cancel-delete-task-${task.id}`}>Keep</button>
+        <button type="button" onClick={() => { setConfirming(false); onDelete(task.id); }} className="press rounded-[8px] bg-coral px-2 py-1 text-[12px] font-semibold text-ink" data-testid={`button-confirm-delete-task-${task.id}`}>Delete</button>
+        <button type="button" onClick={() => setConfirming(false)} className="press rounded-[8px] border border-line px-2 py-1 text-[12px] text-[#a49b8a]" data-testid={`button-cancel-delete-task-${task.id}`}>Keep</button>
       </span>
       : <button type="button" onClick={() => setConfirming(true)} aria-label={`Delete task: ${task.title}`} className="press grid size-7 shrink-0 place-items-center rounded-[8px] text-[#82796d] opacity-70 transition-colors hover:bg-coral/10 hover:text-coral focus-visible:opacity-100 group-hover:opacity-100" data-testid={`button-delete-task-${task.id}`}><Trash2 className="size-3.5" /></button>)}
   </div>;
@@ -1348,10 +1348,10 @@ function TasksView({ tasks, onToggle, onDelete, onAdd, showComposer, setShowComp
     {showComposer && <div className="flex gap-2 rounded-[14px] border border-flame/30 bg-flame/10 p-3"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') submit(); }} placeholder="What would feel good to finish?" className="min-w-0 flex-1 bg-transparent px-2 text-sm text-cream outline-none placeholder:text-[#8f8678]" data-testid="input-new-task" /><button type="button" onClick={submit} className="rounded-[9px] bg-flame px-3 py-2 text-xs font-semibold text-ink" data-testid="button-save-task">Add task</button><button type="button" onClick={() => setShowComposer(false)} className="grid size-8 place-items-center text-[#a49b8a]" aria-label="Cancel adding task" data-testid="button-cancel-task"><X className="size-4" /></button></div>}
     {tasks.length === 0
       ? <section className="rounded-[16px] border border-line bg-surface p-4 sm:p-5"><EmptyState icon={<ListChecks className="size-5" />} title="Your shelf is empty" copy="Add the first small promise." action="Add a task" onClick={() => setShowComposer(true)} /></section>
-      : groupTasksByDay(tasks).map((group) => <section key={group.key} className="rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid={`card-task-day-${group.key}`}>
+      : groupTasksByDay(tasks).slice(0, 3).map((group) => <section key={group.key} className="rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid={`card-task-day-${group.key}`}>
         <div className="mb-3 flex items-center justify-between border-b border-line pb-3">
           <h3 className="font-display text-sm font-semibold" data-testid={`text-task-day-${group.key}`}>{group.label}</h3>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#82796d]">{group.tasks.filter((task) => task.done).length}/{group.tasks.length} done · {group.tasks.reduce((sum, task) => sum + (task.done ? task.xp : 0), 0)} XP</span>
+          <span className="font-mono text-[12px] uppercase tracking-wider text-[#82796d]">{group.tasks.filter((task) => task.done).length}/{group.tasks.length} done · {group.tasks.reduce((sum, task) => sum + (task.done ? task.xp : 0), 0)} XP</span>
         </div>
         <div className="divide-y divide-[#494138]">{group.tasks.map((task) => <TaskRow key={task.id} task={task} onToggle={onToggle} onDelete={onDelete} />)}</div>
       </section>)}
@@ -1408,7 +1408,7 @@ function CalendarView({ events, onAdd, onDelete }: { events: HabitEvent[]; onAdd
       <section className="rounded-[16px] border border-line bg-surface p-4 sm:p-5">
         <div className="mb-3 flex items-center justify-between">
           <button type="button" onClick={() => setCursor(new Date(year, month - 1, 1))} className="press grid size-8 place-items-center rounded-[9px] border border-line text-[#9f9688] hover:text-cream" aria-label="Previous month" data-testid="button-prev-month"><ChevronRight className="size-4 rotate-180" /></button>
-          <div className="font-mono text-[10px] uppercase tracking-wider text-[#9f9688]">{cursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</div>
+          <div className="font-mono text-[12px] uppercase tracking-wider text-[#9f9688]">{cursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</div>
           <button type="button" onClick={() => setCursor(new Date(year, month + 1, 1))} className="press grid size-8 place-items-center rounded-[9px] border border-line text-[#9f9688] hover:text-cream" aria-label="Next month" data-testid="button-next-month"><ChevronRight className="size-4" /></button>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center font-mono text-[9px] uppercase text-[#82796d]">
@@ -1525,16 +1525,16 @@ function FocusView({ onSessionComplete }: { onSessionComplete: (xp: number) => v
 
     <section className="rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid="card-music">
       <div className="flex items-center gap-2"><Music2 className="size-4 text-teal" /><h3 className="font-display text-sm font-semibold">Bring your own sound</h3></div>
-      <p className="mt-2 text-[13px] leading-5 text-[#9f9688]">Paste a YouTube Music, Spotify, or direct audio link. It keeps playing while you move between tabs.</p>
+      <p className="mt-2 text-[15px] leading-5 text-[#9f9688]">Paste a YouTube Music, Spotify, or direct audio link. It keeps playing while you move between tabs.</p>
       <form className="mt-3 flex flex-col gap-2 sm:flex-row" onSubmit={(event) => { event.preventDefault(); if (load(link)) setLink(''); }}>
         <input value={link} onChange={(event) => setLink(event.target.value)} placeholder="https://open.spotify.com/… or https://music.youtube.com/…" className="min-w-0 flex-1 rounded-[10px] border border-line bg-[#2a241f] px-3 py-2.5 text-sm text-cream outline-none focus:border-flame" data-testid="input-music-link" />
         <button type="submit" className="press rounded-[10px] bg-teal px-4 py-2.5 text-xs font-semibold text-ink" data-testid="button-music-play">Play it</button>
       </form>
       {error && <p className="mt-2 text-xs text-coral" role="alert">{error}</p>}
-      {track && <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] text-[#a49b8a]">
+      {track && <div className="mt-3 flex flex-wrap items-center gap-2 text-[15px] text-[#a49b8a]">
         <span className="truncate">Now playing · {track.title}</span>
-        {track.kind === 'audio' && <button type="button" onClick={toggle} className="press rounded-[9px] border border-line px-3 py-1.5 text-[12px] text-cream" data-testid="button-music-toggle">{playing ? 'Pause' : 'Play'}</button>}
-        <button type="button" onClick={stop} className="press rounded-[9px] border border-line px-3 py-1.5 text-[12px] text-cream" data-testid="button-music-stop">Stop</button>
+        {track.kind === 'audio' && <button type="button" onClick={toggle} className="press rounded-[9px] border border-line px-3 py-1.5 text-[14px] text-cream" data-testid="button-music-toggle">{playing ? 'Pause' : 'Play'}</button>}
+        <button type="button" onClick={stop} className="press rounded-[9px] border border-line px-3 py-1.5 text-[14px] text-cream" data-testid="button-music-stop">Stop</button>
       </div>}
     </section>
 
@@ -1604,7 +1604,7 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
         <ProfileAvatar avatarUrl={avatarUrl} name={name} />
         <div className="min-w-0">
           <div className="font-display text-xl font-semibold tracking-[-.04em]" data-testid="text-profile-display-name">{name}</div>
-          <div className="mt-1 truncate text-[13px] text-[#a49b8a]">{email}</div>
+          <div className="mt-1 truncate text-[15px] text-[#a49b8a]">{email}</div>
         </div>
         <Link href="/onboarding" className="press ml-auto rounded-[10px] border border-line px-3.5 py-2 text-xs font-semibold text-cream hover:border-flame" data-testid="link-edit-profile">Edit details</Link>
       </div>
@@ -1619,14 +1619,14 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
     <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-appearance">
       <h3 className="font-display text-sm font-semibold">Appearance</h3>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3"><ThemeSwitch /><span className="text-[13px] text-[#a49b8a]">Light or dark</span></div>
-        <div className="flex items-center gap-3"><AccentPicker /><span className="text-[13px] text-[#a49b8a]">Accent colour</span></div>
+        <div className="flex items-center gap-3"><ThemeSwitch /><span className="text-[15px] text-[#a49b8a]">Light or dark</span></div>
+        <div className="flex items-center gap-3"><AccentPicker /><span className="text-[15px] text-[#a49b8a]">Accent colour</span></div>
       </div>
     </section>
 
     <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-reminders">
       <div className="flex items-center gap-2"><Bell className="size-4 text-flame" /><h3 className="font-display text-sm font-semibold">Reminders</h3></div>
-      <p className="mt-2 text-[13px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed. On a phone, install Habitot to your home screen first, then turn reminders on.</p>
+      <p className="mt-2 text-[15px] leading-5 text-[#9f9688]">Get a gentle nudge on your phone and laptop, even when Habitot is closed. On a phone, install Habitot to your home screen first, then turn reminders on.</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" disabled={pushBusy} onClick={() => void enableReminders()} className="press rounded-[10px] bg-flame px-4 py-2.5 text-xs font-semibold text-ink disabled:opacity-60" data-testid="button-enable-push">{pushBusy ? 'Working…' : pushOn ? 'Reminders on' : 'Turn on reminders'}</button>
         <button type="button" disabled={pushBusy} onClick={() => void sendTestReminder()} className="press rounded-[10px] border border-line px-4 py-2.5 text-xs font-semibold text-cream hover:border-flame disabled:opacity-60" data-testid="button-test-push">Send a test</button>
