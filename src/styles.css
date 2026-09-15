@@ -199,6 +199,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .wiggle { animation: wiggle .5s ease both; }
 @keyframes wiggle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 75% { transform: rotate(-3deg); } }
 
+/* ---- App readability: roomier line-height inside app screens (not landing) ---- */
+.app-shell { line-height: 1.5; }
+.app-shell .leading-4 { line-height: 1.4; }
+.app-shell .leading-5 { line-height: 1.55; }
+.app-shell .leading-6 { line-height: 1.65; }
+
 /* ---- Theme: accents ---- */
 :root[data-accent="coral"] { --flame: #df765d; --primary: 12 66% 62%; --ring: 12 66% 62%; }
 :root[data-accent="teal"] { --flame: #69b39a; --primary: 163 37% 55%; --ring: 163 37% 55%; }

@@ -551,7 +551,7 @@ function AppShell({ title, view, onView, children }: { title: string; view: View
 
   const navigateHome = () => setLocation('/');
   return (
-    <div className="grain min-h-[100dvh] bg-ink text-cream lg:flex">
+    <div className="grain app-shell min-h-[100dvh] bg-ink text-cream lg:flex">
       <aside className="sticky top-0 hidden h-[100dvh] w-[244px] shrink-0 flex-col border-r border-line bg-[#25211d] px-5 py-6 lg:flex">
         <button type="button" onClick={navigateHome} className="w-fit text-left" data-testid="button-sidebar-brand"><Wordmark /></button>
         <div className="mt-12 px-3 eyebrow text-[#736b60]">Your space</div>
