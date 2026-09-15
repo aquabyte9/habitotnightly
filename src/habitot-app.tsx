@@ -1546,7 +1546,192 @@ function FocusView({ onSessionComplete }: { onSessionComplete: (xp: number) => v
   </div>;
 }
 
-function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone, onLogout }: {
+// ============================ Rewards ============================
+
+type EggStage = { min: number; name: string; note: string };
+const EGG_STAGES: EggStage[] = [
+  { min: 1, name: 'A quiet egg', note: 'Something is in there. It is listening to your days.' },
+  { min: 2, name: 'First crack', note: 'A hairline split. Your effort is being felt.' },
+  { min: 4, name: 'Almost out', note: 'The shell is giving way. Not long now.' },
+  { min: 5, name: 'Hatched', note: 'Say hello. Your companion is here because you kept going.' },
+  { min: 8, name: 'Growing up', note: 'Bigger, brighter, and rather pleased with you.' },
+  { min: 12, name: 'Fully bloomed', note: 'A companion shaped entirely by your streaks.' },
+];
+function eggStageIndex(level: number) {
+  let index = 0;
+  EGG_STAGES.forEach((stage, i) => { if (level >= stage.min) index = i; });
+  return index;
+}
+
+function CompanionEgg({ level }: { level: number }) {
+  const index = eggStageIndex(level);
+  const hatched = index >= 3;
+  return <div className="relative grid size-[132px] place-items-center" data-testid="egg-visual" data-stage={index}>
+    <div className="absolute inset-0 rounded-full bg-flame/10 blur-xl" />
+    {hatched ? <div className="relative float-slow">
+      <MascotMark className={index >= 5 ? 'size-24' : index >= 4 ? 'size-20' : 'size-16'} />
+      {index >= 4 && <span className="absolute -right-1 -top-1 text-flame"><Sparkles className="size-5" /></span>}
+    </div> : <svg viewBox="0 0 100 130" className="relative size-[112px] float-slow" role="img" aria-label="Companion egg">
+      <defs><linearGradient id="eggfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f3b464" /><stop offset="100%" stopColor="#c8813a" /></linearGradient></defs>
+      <path d="M50 4C24 32 10 62 10 84a40 40 0 0 0 80 0c0-22-14-52-40-80Z" fill="url(#eggfill)" stroke="rgba(0,0,0,.25)" strokeWidth="2" />
+      <path d="M32 40c8 5 6 12 14 14" stroke="rgba(255,255,255,.35)" strokeWidth="3" fill="none" strokeLinecap="round" />
+      {index >= 1 && <path d="M30 70l12-8 -4 14 14-6" stroke="rgba(40,26,14,.75)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
+      {index >= 2 && <path d="M66 52l-10 10 10 6-8 10 10 8" stroke="rgba(40,26,14,.75)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
+      {index >= 2 && <path d="M40 98l10-8 6 10" stroke="rgba(40,26,14,.6)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
+    </svg>}
+  </div>;
+}
+
+type Challenge = { id: string; title: string; note: string; xp: number; target: number; progress: (ctx: ChallengeCtx) => number };
+type ChallengeCtx = { tasksDone: number; tasksTotal: number; streak: number; level: number; xp: number };
+const CHALLENGE_POOL: Challenge[] = [
+  { id: 'finish-5', title: 'Finish five things', note: 'Any five tasks, whenever they happen.', xp: 40, target: 5, progress: (c) => c.tasksDone },
+  { id: 'early-3', title: 'Three before the day gets loud', note: 'Tick off three tasks in one go.', xp: 30, target: 3, progress: (c) => c.tasksDone },
+  { id: 'streak-3', title: 'Three days in a row', note: 'Keep the streak alive for three days.', xp: 50, target: 3, progress: (c) => c.streak },
+  { id: 'streak-7', title: 'A full week of showing up', note: 'Seven straight days on the streak.', xp: 90, target: 7, progress: (c) => c.streak },
+  { id: 'plan-day', title: 'Fill your shelf', note: 'Have at least four tasks waiting for you.', xp: 25, target: 4, progress: (c) => c.tasksTotal },
+  { id: 'clear-shelf', title: 'Clear the shelf', note: 'Finish everything you put on the list.', xp: 60, target: 1, progress: (c) => (c.tasksTotal > 0 && c.tasksDone >= c.tasksTotal ? 1 : 0) },
+];
+function weekKey(now = new Date()) {
+  const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  return `${date.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+}
+function weeklyChallenges(key: string) {
+  const seed = [...key].reduce((total, char) => total + char.charCodeAt(0), 0);
+  const count = 3;
+  const picked: Challenge[] = [];
+  for (let i = 0; i < count; i += 1) {
+    let index = (seed * (i + 3) + i * 7) % CHALLENGE_POOL.length;
+    while (picked.includes(CHALLENGE_POOL[index]!)) index = (index + 1) % CHALLENGE_POOL.length;
+    picked.push(CHALLENGE_POOL[index]!);
+  }
+  return picked;
+}
+function daysUntilWeekEnd() {
+  const day = new Date().getDay() || 7;
+  return 8 - day;
+}
+
+function XpBurst({ amount, onDone }: { amount: number; onDone: () => void }) {
+  useEffect(() => {
+    const timer = window.setTimeout(onDone, 1900);
+    return () => window.clearTimeout(timer);
+  }, [onDone]);
+  return <div className="pointer-events-none fixed inset-x-0 bottom-28 z-40 flex justify-center lg:bottom-12" role="status" data-testid="popup-xp-burst">
+    <div className="pop-in flex items-center gap-2 rounded-full border border-flame/40 bg-[#2a241f] px-5 py-3 shadow-[0_10px_34px_rgba(0,0,0,.45)]">
+      <Sparkles className="size-4 text-flame" />
+      <span className="font-display text-base font-semibold text-flame">+{amount} XP</span>
+      <span className="text-[13px] text-[#a49b8a]">Challenge complete</span>
+    </div>
+  </div>;
+}
+
+function RewardsView({ xp, streak, tasksTotal, tasksDone, onBack, onAward }: {
+  xp: number;
+  streak: number;
+  tasksTotal: number;
+  tasksDone: number;
+  onBack: () => void;
+  onAward: (amount: number) => void;
+}) {
+  const level = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
+  const stageIndex = eggStageIndex(level);
+  const stage = EGG_STAGES[stageIndex]!;
+  const nextStage = EGG_STAGES[stageIndex + 1];
+  const key = weekKey();
+  const storageKey = `habitot-challenges-${key}`;
+  const challenges = useMemo(() => weeklyChallenges(key), [key]);
+  const [claimed, setClaimed] = useState<string[]>([]);
+  const [burst, setBurst] = useState<number | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      setClaimed(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch { setClaimed([]); }
+  }, [storageKey]);
+
+  const claim = (challenge: Challenge) => {
+    if (claimed.includes(challenge.id)) return;
+    const next = [...claimed, challenge.id];
+    setClaimed(next);
+    try { window.localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* private mode */ }
+    onAward(challenge.xp);
+    setBurst(challenge.xp);
+  };
+
+  const ctx: ChallengeCtx = { tasksDone, tasksTotal, streak, level, xp };
+
+  return <div className="max-w-[820px] space-y-4 pb-28 lg:pb-4" data-testid="view-rewards">
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <div className="eyebrow text-flame">Earned, not bought</div>
+        <h2 className="mt-2 font-display text-3xl font-semibold tracking-[-.06em]">Rewards</h2>
+        <p className="mt-2 text-sm text-[#9f9688]">Your companion grows with your levels, and a fresh set of small challenges lands every week.</p>
+      </div>
+      <button type="button" onClick={onBack} className="press shrink-0 rounded-[10px] border border-line px-3.5 py-2 text-xs font-semibold text-cream hover:border-flame" data-testid="button-rewards-back">Back</button>
+    </div>
+
+    <section className="relative overflow-hidden rounded-[16px] border border-line bg-surface p-5" data-testid="card-companion-egg">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-flame/10 to-transparent" />
+      <div className="relative flex flex-wrap items-center gap-6">
+        <CompanionEgg level={level} />
+        <div className="min-w-[220px] flex-1">
+          <div className="font-mono text-[11px] uppercase tracking-[.18em] text-[#a49b8a]">Companion egg</div>
+          <div className="mt-2 font-display text-2xl font-semibold tracking-[-.04em]" data-testid="text-egg-stage">{stage.name}</div>
+          <p className="mt-2 text-[15px] leading-6 text-[#a49b8a]">{stage.note}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-[13px]">
+            <span className="rounded-full bg-flame/10 px-2.5 py-1 font-mono text-[12px] text-flame">Level {level}</span>
+            {nextStage ? <span className="text-[#9f9688]">Next change at level {nextStage.min}</span> : <span className="text-teal">Fully grown</span>}
+          </div>
+          <div className="mt-4 flex gap-1.5">
+            {EGG_STAGES.map((item, index) => <span key={item.min} className={`h-1.5 flex-1 rounded-full ${index <= stageIndex ? 'bg-flame' : 'bg-[#3b332b]'}`} />)}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-weekly-challenges">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-display text-base font-semibold">Weekly challenges</h3>
+        <span className="font-mono text-[12px] uppercase tracking-[.14em] text-[#8e8578]">Resets in {daysUntilWeekEnd()} day{daysUntilWeekEnd() === 1 ? '' : 's'}</span>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {challenges.map((challenge) => {
+          const current = Math.min(challenge.target, Math.max(0, challenge.progress(ctx)));
+          const complete = current >= challenge.target;
+          const isClaimed = claimed.includes(challenge.id);
+          return <div key={challenge.id} className="rounded-[14px] border border-line bg-[#332d26] p-4" data-testid={`card-challenge-${challenge.id}`}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-display text-[15px] font-semibold">{challenge.title}</div>
+                <p className="mt-1 text-[14px] leading-5 text-[#a49b8a]">{challenge.note}</p>
+              </div>
+              <span className="shrink-0 rounded-full bg-teal/10 px-2.5 py-1 font-mono text-[12px] text-teal">+{challenge.xp} XP</span>
+            </div>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#241f1a]">
+              <div className="h-full rounded-full bg-gradient-to-r from-flame to-teal" style={{ width: `${(current / challenge.target) * 100}%` }} />
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="font-mono text-[12px] text-[#8e8578]">{current} / {challenge.target}</span>
+              {isClaimed
+                ? <span className="font-mono text-[12px] uppercase tracking-[.14em] text-teal" data-testid={`text-claimed-${challenge.id}`}>Claimed</span>
+                : <button type="button" disabled={!complete} onClick={() => claim(challenge)} className="press rounded-[10px] bg-flame px-4 py-2 text-xs font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40" data-testid={`button-claim-${challenge.id}`}>{complete ? 'Claim reward' : 'Keep going'}</button>}
+            </div>
+          </div>;
+        })}
+      </div>
+    </section>
+
+    {burst !== null && <XpBurst amount={burst} onDone={() => setBurst(null)} />}
+  </div>;
+}
+
+function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone, onLogout, onOpenRewards }: {
   name: string;
   email: string;
   avatarUrl?: string | null | undefined;
