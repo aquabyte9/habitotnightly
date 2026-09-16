@@ -61,7 +61,7 @@ import {
 
 const queryClient = new QueryClient();
 
-type View = 'dashboard' | 'tasks' | 'calendar' | 'focus' | 'leaderboard' | 'profile';
+type View = 'dashboard' | 'tasks' | 'calendar' | 'focus' | 'leaderboard' | 'profile' | 'rewards';
 type HabitEvent = { id: string; iso: string; day: string; date: string; title: string; time: string; tone: 'teal' | 'coral' | 'sky' };
 
 
@@ -1142,7 +1142,7 @@ function DashboardPreview() {
     setView('dashboard');
     setLocation('/login');
   };
-  const title = navItems.find((item) => item.id === view)?.label ?? 'Overview';
+  const title = view === 'rewards' ? 'Rewards' : navItems.find((item) => item.id === view)?.label ?? 'Overview';
   const displayName = profile?.display_name?.trim()
     || user?.user_metadata?.full_name
     || user?.user_metadata?.name
@@ -1152,7 +1152,7 @@ function DashboardPreview() {
   return <AppShell title={title} view={view} onView={setView}>
     <AuthPanel user={user} open={authOpen} onOpenChange={setAuthOpen} onAuthed={hydrate} onLogout={logout} />
     {error && <div className="mb-4 rounded-[12px] border border-coral/30 bg-coral/10 px-4 py-3 text-xs text-[#f2b3a8]" role="alert">{error}</div>}
-    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(input) => void addEvent(input)} onDelete={(id) => void removeEvent(id)} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} /> : <FocusView onSessionComplete={awardXp} />}
+    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(input) => void addEvent(input)} onDelete={(id) => void removeEvent(id)} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'rewards' ? <RewardsView xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onBack={() => setView('profile')} onAward={awardXp} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} onOpenRewards={() => setView('rewards')} /> : <FocusView onSessionComplete={awardXp} />}
     {celebrateLevel !== null && <LevelUpCelebration level={celebrateLevel} onDismiss={() => setCelebrateLevel(null)} />}
   </AppShell>;
 }
@@ -1740,6 +1740,7 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
   tasksTotal: number;
   tasksDone: number;
   onLogout: () => void;
+  onOpenRewards: () => void;
 }) {
   const level = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
   const [pushState, setPushState] = useState<string>('');
