@@ -1067,10 +1067,18 @@ function DashboardPreview() {
       const nextLevel = Math.floor(next / XP_PER_LEVEL) + 1;
       if (nextLevel > levelRef.current) setCelebrateLevel(nextLevel);
       levelRef.current = nextLevel;
-      void saveProgress({ xp: next }).catch(() => undefined);
+      // Earning XP counts as an active day, so the streak stays alive.
+      if (amount > 0) {
+        const { streak: nextStreakValue, today } = streakAfterCompletion(lastDoneOn, streak);
+        setStreak(nextStreakValue);
+        setLastDoneOn(today);
+        void saveProgress({ xp: next, streakDays: nextStreakValue, lastActiveOn: today }).catch(() => undefined);
+      } else {
+        void saveProgress({ xp: next }).catch(() => undefined);
+      }
       return next;
     });
-  }, []);
+  }, [lastDoneOn, streak]);
   const addTask = async (title: string) => {
     if (!title.trim()) return;
     try {
