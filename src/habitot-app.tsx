@@ -1558,12 +1558,12 @@ function FocusView({ onSessionComplete }: { onSessionComplete: (xp: number) => v
 
 type EggStage = { min: number; name: string; note: string };
 const EGG_STAGES: EggStage[] = [
-  { min: 1, name: 'A quiet egg', note: 'Something is in there. It is listening to your days.' },
+  { min: 1, name: 'A quiet egg', note: 'A dragon egg. It is listening to your days.' },
   { min: 2, name: 'First crack', note: 'A hairline split. Your effort is being felt.' },
   { min: 4, name: 'Almost out', note: 'The shell is giving way. Not long now.' },
-  { min: 5, name: 'Hatched', note: 'Say hello. Your companion is here because you kept going.' },
-  { min: 8, name: 'Growing up', note: 'Bigger, brighter, and rather pleased with you.' },
-  { min: 12, name: 'Fully bloomed', note: 'A companion shaped entirely by your streaks.' },
+  { min: 5, name: 'Hatchling', note: 'A tiny dragon, wobbly wings and all. It is yours.' },
+  { min: 8, name: 'Young dragon', note: 'Bigger wings, real horns, and rather pleased with you.' },
+  { min: 12, name: 'Full-grown dragon', note: 'A dragon shaped entirely by your streaks.' },
 ];
 function eggStageIndex(level: number) {
   let index = 0;
@@ -1571,24 +1571,78 @@ function eggStageIndex(level: number) {
   return index;
 }
 
-function CompanionEgg({ level }: { level: number }) {
+/** Every account gets its own dragon colour, picked from their id. */
+function dragonHue(seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) % 360000;
+  return hash % 360;
+}
+
+function CompanionEgg({ level, seed = 'habitot' }: { level: number; seed?: string }) {
   const index = eggStageIndex(level);
   const hatched = index >= 3;
+  const hue = dragonHue(seed);
+  const light = `hsl(${hue} 78% 66%)`;
+  const dark = `hsl(${(hue + 22) % 360} 62% 40%)`;
+  const belly = `hsl(${(hue + 40) % 360} 70% 82%)`;
+  const gradientId = `dragon-${hue}`;
+  const scale = index >= 5 ? 'size-[128px]' : index >= 4 ? 'size-[116px]' : 'size-[96px]';
+
+  if (!hatched) {
+    return <div className="relative grid size-[132px] place-items-center" data-testid="egg-visual" data-stage={index}>
+      <div className="absolute inset-0 rounded-full blur-xl" style={{ background: `hsl(${hue} 70% 55% / 0.18)` }} />
+      <svg viewBox="0 0 100 130" className="relative size-[112px] float-slow" role="img" aria-label="Dragon egg">
+        <defs><linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={light} /><stop offset="100%" stopColor={dark} /></linearGradient></defs>
+        <path d="M50 4C24 32 10 62 10 84a40 40 0 0 0 80 0c0-22-14-52-40-80Z" fill={`url(#${gradientId})`} stroke="rgba(0,0,0,.25)" strokeWidth="2" />
+        <path d="M32 40c8 5 6 12 14 14" stroke="rgba(255,255,255,.35)" strokeWidth="3" fill="none" strokeLinecap="round" />
+        <g opacity=".45" fill="rgba(255,255,255,.5)">
+          <ellipse cx="38" cy="72" rx="5" ry="3.4" /><ellipse cx="58" cy="86" rx="5" ry="3.4" /><ellipse cx="46" cy="100" rx="5" ry="3.4" />
+        </g>
+        {index >= 1 && <path d="M30 70l12-8 -4 14 14-6" stroke="rgba(30,18,10,.75)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
+        {index >= 2 && <path d="M66 52l-10 10 10 6-8 10 10 8" stroke="rgba(30,18,10,.75)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
+        {index >= 2 && <path d="M40 98l10-8 6 10" stroke="rgba(30,18,10,.6)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
+      </svg>
+    </div>;
+  }
+
+  const adult = index >= 5;
+  const young = index >= 4;
   return <div className="relative grid size-[132px] place-items-center" data-testid="egg-visual" data-stage={index}>
-    <div className="absolute inset-0 rounded-full bg-flame/10 blur-xl" />
-    {hatched ? <div className="relative float-slow">
-      <MascotMark className={index >= 5 ? 'size-24' : index >= 4 ? 'size-20' : 'size-16'} />
-      {index >= 4 && <span className="absolute -right-1 -top-1 text-flame"><Sparkles className="size-5" /></span>}
-    </div> : <svg viewBox="0 0 100 130" className="relative size-[112px] float-slow" role="img" aria-label="Companion egg">
-      <defs><linearGradient id="eggfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f3b464" /><stop offset="100%" stopColor="#c8813a" /></linearGradient></defs>
-      <path d="M50 4C24 32 10 62 10 84a40 40 0 0 0 80 0c0-22-14-52-40-80Z" fill="url(#eggfill)" stroke="rgba(0,0,0,.25)" strokeWidth="2" />
-      <path d="M32 40c8 5 6 12 14 14" stroke="rgba(255,255,255,.35)" strokeWidth="3" fill="none" strokeLinecap="round" />
-      {index >= 1 && <path d="M30 70l12-8 -4 14 14-6" stroke="rgba(40,26,14,.75)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
-      {index >= 2 && <path d="M66 52l-10 10 10 6-8 10 10 8" stroke="rgba(40,26,14,.75)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
-      {index >= 2 && <path d="M40 98l10-8 6 10" stroke="rgba(40,26,14,.6)" strokeWidth="3" fill="none" strokeLinejoin="round" />}
-    </svg>}
+    <div className="absolute inset-0 rounded-full blur-xl" style={{ background: `hsl(${hue} 70% 55% / 0.2)` }} />
+    <svg viewBox="0 0 120 120" className={`relative ${scale} float-slow`} role="img" aria-label="Your dragon">
+      <defs><linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor={light} /><stop offset="100%" stopColor={dark} /></linearGradient></defs>
+      {/* wings grow with the stage */}
+      <path
+        d={young ? 'M60 60C40 34 20 30 12 40c-6 8 4 26 22 34 10 4 20 2 26-6Z' : 'M60 62C48 48 36 46 30 52c-4 6 2 16 12 20 7 3 14 2 18-4Z'}
+        fill={dark} opacity=".85" stroke="rgba(0,0,0,.2)" strokeWidth="2"
+      />
+      {adult && <path d="M60 60C80 34 100 30 108 40c6 8-4 26-22 34-10 4-20 2-26-6Z" fill={dark} opacity=".6" stroke="rgba(0,0,0,.2)" strokeWidth="2" />}
+      {/* tail */}
+      <path d={adult ? 'M62 88c18 12 32 6 38-8' : 'M62 86c12 8 22 4 26-4'} stroke={dark} strokeWidth={adult ? 9 : 7} fill="none" strokeLinecap="round" />
+      {/* body */}
+      <ellipse cx="58" cy="78" rx={adult ? 26 : young ? 23 : 20} ry={adult ? 22 : young ? 19 : 17} fill={`url(#${gradientId})`} stroke="rgba(0,0,0,.22)" strokeWidth="2" />
+      <ellipse cx="56" cy="84" rx={adult ? 15 : 12} ry={adult ? 11 : 9} fill={belly} opacity=".65" />
+      {/* head */}
+      <ellipse cx="54" cy="46" rx={adult ? 22 : young ? 19 : 17} ry={adult ? 19 : young ? 17 : 15} fill={`url(#${gradientId})`} stroke="rgba(0,0,0,.22)" strokeWidth="2" />
+      <ellipse cx="46" cy="54" rx={adult ? 12 : 10} ry={adult ? 8 : 7} fill={belly} opacity=".6" />
+      {/* snout + nostril */}
+      <ellipse cx="38" cy="52" rx="8" ry="6" fill={light} stroke="rgba(0,0,0,.18)" strokeWidth="1.5" />
+      <circle cx="33" cy="51" r="1.6" fill="rgba(0,0,0,.45)" />
+      {/* horns */}
+      <path d={young ? 'M58 30c2-10 8-14 14-15-4 6-4 12-6 17Z' : 'M58 32c1-6 5-9 10-10-3 4-3 8-4 11Z'} fill={dark} />
+      {adult && <path d="M48 30c0-9 4-14 9-16-3 6-3 11-4 16Z" fill={dark} />}
+      {/* back spines */}
+      <path d={adult ? 'M64 62l7-9 2 11 8-7 1 12' : 'M64 64l6-7 2 9 6-5 1 9'} fill={dark} opacity=".9" />
+      {/* eye */}
+      <ellipse cx="50" cy="43" rx={adult ? 4.2 : 3.6} ry={adult ? 5 : 4.2} fill="#1c1410" />
+      <circle cx="51.4" cy="41.4" r="1.4" fill="rgba(255,255,255,.9)" />
+      {/* feet */}
+      <path d="M46 96c0 5 3 7 7 7M68 96c0 5-3 7-7 7" stroke={dark} strokeWidth="5" strokeLinecap="round" fill="none" />
+    </svg>
+    {adult && <span className="absolute -right-1 -top-1 text-flame"><Sparkles className="size-5" /></span>}
   </div>;
 }
+
 
 type Challenge = { id: string; title: string; note: string; xp: number; target: number; progress: (ctx: ChallengeCtx) => number };
 type ChallengeCtx = { tasksDone: number; tasksTotal: number; streak: number; level: number; xp: number };
