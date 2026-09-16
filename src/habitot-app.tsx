@@ -1802,6 +1802,17 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
       </div>
     </section>
 
+    <button type="button" onClick={onOpenRewards} className="press flex w-full items-center justify-between gap-4 rounded-[16px] border border-flame/30 bg-gradient-to-r from-flame/12 to-transparent p-5 text-left hover:border-flame" data-testid="button-open-rewards">
+      <span className="flex items-center gap-3">
+        <Sparkles className="size-5 text-flame" />
+        <span>
+          <span className="block font-display text-sm font-semibold">Rewards</span>
+          <span className="mt-1 block text-[14px] text-[#a49b8a]">Your companion egg and this week&rsquo;s challenges.</span>
+        </span>
+      </span>
+      <span className="font-mono text-[12px] uppercase tracking-[.14em] text-flame">Open</span>
+    </button>
+
     <section className="rounded-[16px] border border-line bg-surface p-5" data-testid="card-appearance">
       <h3 className="font-display text-sm font-semibold">Appearance</h3>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
