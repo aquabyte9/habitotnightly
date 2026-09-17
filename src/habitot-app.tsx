@@ -1692,11 +1692,12 @@ function XpBurst({ amount, onDone }: { amount: number; onDone: () => void }) {
   </div>;
 }
 
-function RewardsView({ xp, streak, tasksTotal, tasksDone, onBack, onAward }: {
+function RewardsView({ xp, streak, tasksTotal, tasksDone, seed, onBack, onAward }: {
   xp: number;
   streak: number;
   tasksTotal: number;
   tasksDone: number;
+  seed?: string;
   onBack: () => void;
   onAward: (amount: number) => void;
 }) {
