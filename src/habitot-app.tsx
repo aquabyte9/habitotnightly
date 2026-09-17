@@ -1705,24 +1705,37 @@ function RewardsView({ xp, streak, tasksTotal, tasksDone, seed, onBack, onAward 
   const stageIndex = eggStageIndex(level);
   const stage = EGG_STAGES[stageIndex]!;
   const nextStage = EGG_STAGES[stageIndex + 1];
-  const key = weekKey();
-  const storageKey = `habitot-challenges-${key}`;
+  const [key, setKey] = useState(() => weekKey());
+  const storageKey = `habitot-challenges-${seed ?? 'local'}`;
   const challenges = useMemo(() => weeklyChallenges(key), [key]);
   const [claimed, setClaimed] = useState<string[]>([]);
   const [burst, setBurst] = useState<number | null>(null);
 
+  // Roll over to a fresh set of challenges as soon as a new week starts.
+  useEffect(() => {
+    const tick = () => setKey((current) => {
+      const now = weekKey();
+      return now === current ? current : now;
+    });
+    const timer = window.setInterval(tick, 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(storageKey);
-      setClaimed(raw ? (JSON.parse(raw) as string[]) : []);
+      const saved = raw ? (JSON.parse(raw) as { week?: string; ids?: string[] }) : null;
+      setClaimed(saved && saved.week === key && Array.isArray(saved.ids) ? saved.ids : []);
+      // Drop last week's record so nothing carries over.
+      if (saved && saved.week !== key) window.localStorage.setItem(storageKey, JSON.stringify({ week: key, ids: [] }));
     } catch { setClaimed([]); }
-  }, [storageKey]);
+  }, [storageKey, key]);
 
   const claim = (challenge: Challenge) => {
     if (claimed.includes(challenge.id)) return;
     const next = [...claimed, challenge.id];
     setClaimed(next);
-    try { window.localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* private mode */ }
+    try { window.localStorage.setItem(storageKey, JSON.stringify({ week: key, ids: next })); } catch { /* private mode */ }
     onAward(challenge.xp);
     setBurst(challenge.xp);
   };
