@@ -589,11 +589,37 @@ function NavButton({ item, active, onClick, desktop = false }: { item: (typeof n
 
 const XP_PER_LEVEL = 100;
 
+// XP needed to go from `level` to `level + 1`. After every 10 levels the
+// requirement rises by 100 more: levels 1-10 cost 100 each, 11-20 cost 200,
+// 21-30 cost 300, and so on.
+function levelXpCost(level: number) {
+  return XP_PER_LEVEL * (Math.floor((level - 1) / 10) + 1);
+}
+
+// Total XP needed to reach `level` (level 1 starts at 0 XP).
+function xpToReachLevel(level: number) {
+  const blocks = Math.floor((level - 1) / 10);
+  const rest = (level - 1) % 10;
+  return 500 * blocks * (blocks + 1) + rest * XP_PER_LEVEL * (blocks + 1);
+}
+
+// Inverse of xpToReachLevel: the level a given amount of XP puts you at.
+function levelFromXp(xp: number) {
+  const safe = Math.max(0, Math.floor(xp));
+  let blocks = Math.max(0, Math.floor((-1 + Math.sqrt(1 + safe / 125)) / 2));
+  while (500 * (blocks + 1) * (blocks + 2) <= safe) blocks += 1;
+  while (blocks > 0 && 500 * blocks * (blocks + 1) > safe) blocks -= 1;
+  const base = xpToReachLevel(10 * blocks + 1);
+  const cost = XP_PER_LEVEL * (blocks + 1);
+  const rest = Math.min(9, Math.floor((safe - base) / cost));
+  return 10 * blocks + rest + 1;
+}
+
 function ProfileHeader({ streak, xp, name, avatarUrl }: { streak: number; xp: number; name: string; avatarUrl?: string | null | undefined }) {
   const safeXp = Math.max(0, xp);
-  const level = Math.floor(safeXp / XP_PER_LEVEL) + 1;
-  const into = safeXp % XP_PER_LEVEL;
-  const goal = XP_PER_LEVEL;
+  const level = levelFromXp(safeXp);
+  const into = safeXp - xpToReachLevel(level);
+  const goal = levelXpCost(level);
   const pct = Math.max(0, Math.min(100, (into / goal) * 100));
   return <section className="relative overflow-hidden rounded-[16px] border border-line bg-surface p-4 sm:p-5" data-testid="card-profile-header">
     <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-flame/10 via-teal/5 to-transparent" />
@@ -960,7 +986,7 @@ function DashboardPreview() {
 
   const commitXp = useCallback((value: number) => {
     const nextXp = Math.max(0, value);
-    const nextLevel = Math.floor(nextXp / XP_PER_LEVEL) + 1;
+    const nextLevel = levelFromXp(nextXp);
     if (nextLevel > levelRef.current) setCelebrateLevel(nextLevel);
     levelRef.current = nextLevel;
     setXp(nextXp);
@@ -988,7 +1014,7 @@ function DashboardPreview() {
       setTasks(account.tasks);
       setProfile(account.profile);
       const currentXp = Math.max(0, account.profile?.xp ?? 0);
-      levelRef.current = Math.floor(currentXp / XP_PER_LEVEL) + 1;
+      levelRef.current = levelFromXp(currentXp);
       setXp(currentXp);
       // The streak only counts days a task was actually finished: a full day
       // with nothing finished drops it back to zero.
@@ -1056,7 +1082,7 @@ function DashboardPreview() {
       } catch (updateError) {
         setTasks((current) => current.map((item) => item.id === id ? { ...item, done: task.done } : item));
         setXp(xp);
-        levelRef.current = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
+        levelRef.current = levelFromXp(Math.max(0, xp));
         setError(updateError instanceof Error ? updateError.message : 'Unable to save that change.');
       }
     }
@@ -1064,7 +1090,7 @@ function DashboardPreview() {
   const awardXp = useCallback((amount: number) => {
     setXp((current) => {
       const next = Math.max(0, current + amount);
-      const nextLevel = Math.floor(next / XP_PER_LEVEL) + 1;
+      const nextLevel = levelFromXp(next);
       if (nextLevel > levelRef.current) setCelebrateLevel(nextLevel);
       levelRef.current = nextLevel;
       // Earning XP counts as an active day, so the streak stays alive.
@@ -1701,7 +1727,7 @@ function RewardsView({ xp, streak, tasksTotal, tasksDone, seed, onBack, onAward 
   onBack: () => void;
   onAward: (amount: number) => void;
 }) {
-  const level = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
+  const level = levelFromXp(Math.max(0, xp));
   const stageIndex = eggStageIndex(level);
   const stage = EGG_STAGES[stageIndex]!;
   const nextStage = EGG_STAGES[stageIndex + 1];
@@ -1818,7 +1844,7 @@ function ProfileView({ name, email, avatarUrl, xp, streak, tasksTotal, tasksDone
   onLogout: () => void;
   onOpenRewards: () => void;
 }) {
-  const level = Math.floor(Math.max(0, xp) / XP_PER_LEVEL) + 1;
+  const level = levelFromXp(Math.max(0, xp));
   const [pushState, setPushState] = useState<string>('');
   const [pushBusy, setPushBusy] = useState(false);
   const [pushOn, setPushOn] = useState(false);
