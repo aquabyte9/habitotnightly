@@ -1160,7 +1160,7 @@ function DashboardPreview() {
   return <AppShell title={title} view={view} onView={setView}>
     <AuthPanel user={user} open={authOpen} onOpenChange={setAuthOpen} onAuthed={hydrate} onLogout={logout} />
     {error && <div className="mb-4 rounded-[12px] border border-coral/30 bg-coral/10 px-4 py-3 text-xs text-[#f2b3a8]" role="alert">{error}</div>}
-    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(input) => void addEvent(input)} onDelete={(id) => void removeEvent(id)} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'rewards' ? <RewardsView xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onBack={() => setView('profile')} onAward={awardXp} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} onOpenRewards={() => setView('rewards')} /> : <FocusView onSessionComplete={awardXp} />}
+    {loading ? <DashboardLoading /> : view === 'dashboard' ? <Overview tasks={tasks} events={events} done={done} xp={xp} streak={streak} name={displayName} avatarUrl={profile?.avatar_url} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onView={setView} /> : view === 'tasks' ? <TasksView tasks={tasks} onToggle={(id) => void toggleTask(id)} onDelete={(id) => void removeTask(id)} onAdd={(value) => void addTask(value)} showComposer={showComposer} setShowComposer={setShowComposer} /> : view === 'calendar' ? <CalendarView events={events} onAdd={(input) => void addEvent(input)} onDelete={(id) => void removeEvent(id)} /> : view === 'leaderboard' ? <LeaderboardView entries={leaderboard} loading={leaderboardLoading} error={leaderboardError} onRetry={() => void loadLeaderboard()} /> : view === 'rewards' ? <RewardsView xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} seed={user?.id ?? profile?.id ?? 'habitot'} onBack={() => setView('profile')} onAward={awardXp} /> : view === 'profile' ? <ProfileView name={displayName} email={user?.email ?? ''} avatarUrl={profile?.avatar_url} xp={xp} streak={streak} tasksTotal={tasks.length} tasksDone={done} onLogout={() => void logout()} onOpenRewards={() => setView('rewards')} /> : <FocusView onSessionComplete={awardXp} />}
     {celebrateLevel !== null && <LevelUpCelebration level={celebrateLevel} onDismiss={() => setCelebrateLevel(null)} />}
   </AppShell>;
 }
@@ -1692,11 +1692,12 @@ function XpBurst({ amount, onDone }: { amount: number; onDone: () => void }) {
   </div>;
 }
 
-function RewardsView({ xp, streak, tasksTotal, tasksDone, onBack, onAward }: {
+function RewardsView({ xp, streak, tasksTotal, tasksDone, seed, onBack, onAward }: {
   xp: number;
   streak: number;
   tasksTotal: number;
   tasksDone: number;
+  seed?: string;
   onBack: () => void;
   onAward: (amount: number) => void;
 }) {
@@ -1704,24 +1705,37 @@ function RewardsView({ xp, streak, tasksTotal, tasksDone, onBack, onAward }: {
   const stageIndex = eggStageIndex(level);
   const stage = EGG_STAGES[stageIndex]!;
   const nextStage = EGG_STAGES[stageIndex + 1];
-  const key = weekKey();
-  const storageKey = `habitot-challenges-${key}`;
+  const [key, setKey] = useState(() => weekKey());
+  const storageKey = `habitot-challenges-${seed ?? 'local'}`;
   const challenges = useMemo(() => weeklyChallenges(key), [key]);
   const [claimed, setClaimed] = useState<string[]>([]);
   const [burst, setBurst] = useState<number | null>(null);
 
+  // Roll over to a fresh set of challenges as soon as a new week starts.
+  useEffect(() => {
+    const tick = () => setKey((current) => {
+      const now = weekKey();
+      return now === current ? current : now;
+    });
+    const timer = window.setInterval(tick, 60000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(storageKey);
-      setClaimed(raw ? (JSON.parse(raw) as string[]) : []);
+      const saved = raw ? (JSON.parse(raw) as { week?: string; ids?: string[] }) : null;
+      setClaimed(saved && saved.week === key && Array.isArray(saved.ids) ? saved.ids : []);
+      // Drop last week's record so nothing carries over.
+      if (saved && saved.week !== key) window.localStorage.setItem(storageKey, JSON.stringify({ week: key, ids: [] }));
     } catch { setClaimed([]); }
-  }, [storageKey]);
+  }, [storageKey, key]);
 
   const claim = (challenge: Challenge) => {
     if (claimed.includes(challenge.id)) return;
     const next = [...claimed, challenge.id];
     setClaimed(next);
-    try { window.localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* private mode */ }
+    try { window.localStorage.setItem(storageKey, JSON.stringify({ week: key, ids: next })); } catch { /* private mode */ }
     onAward(challenge.xp);
     setBurst(challenge.xp);
   };
@@ -1741,7 +1755,7 @@ function RewardsView({ xp, streak, tasksTotal, tasksDone, onBack, onAward }: {
     <section className="relative overflow-hidden rounded-[16px] border border-line bg-surface p-5" data-testid="card-companion-egg">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-flame/10 to-transparent" />
       <div className="relative flex flex-wrap items-center gap-6">
-        <CompanionEgg level={level} />
+        <CompanionEgg level={level} seed={seed ?? 'habitot'} />
         <div className="min-w-[220px] flex-1">
           <div className="font-mono text-[11px] uppercase tracking-[.18em] text-[#a49b8a]">Companion egg</div>
           <div className="mt-2 font-display text-2xl font-semibold tracking-[-.04em]" data-testid="text-egg-stage">{stage.name}</div>
