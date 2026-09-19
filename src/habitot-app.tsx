@@ -1845,7 +1845,7 @@ function RewardsView({ xp, streak, tasksTotal, tasksDone, seed, onBack, onAward 
               <span className="font-mono text-[12px] text-[#8e8578]">{current} / {challenge.target}</span>
               {isClaimed
                 ? <span className="font-mono text-[12px] uppercase tracking-[.14em] text-teal" data-testid={`text-claimed-${challenge.id}`}>Claimed</span>
-                : <button type="button" disabled={!complete} onClick={() => claim(challenge)} className="press rounded-[10px] bg-flame px-4 py-2 text-xs font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40" data-testid={`button-claim-${challenge.id}`}>{complete ? 'Claim reward' : 'Keep going'}</button>}
+                : <button type="button" disabled={!complete} onClick={() => { void claim(challenge); }} className="press rounded-[10px] bg-flame px-4 py-2 text-xs font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40" data-testid={`button-claim-${challenge.id}`}>{complete ? 'Claim reward' : 'Keep going'}</button>}
             </div>
           </div>;
         })}
