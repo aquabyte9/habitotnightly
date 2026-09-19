@@ -1749,21 +1749,42 @@ function RewardsView({ xp, streak, tasksTotal, tasksDone, seed, onBack, onAward 
     return () => window.clearInterval(timer);
   }, []);
 
-  useEffect(() => {
+  const readLocal = useCallback(() => {
     try {
       const raw = window.localStorage.getItem(storageKey);
       const saved = raw ? (JSON.parse(raw) as { week?: string; ids?: string[] }) : null;
-      setClaimed(saved && saved.week === key && Array.isArray(saved.ids) ? saved.ids : []);
-      // Drop last week's record so nothing carries over.
-      if (saved && saved.week !== key) window.localStorage.setItem(storageKey, JSON.stringify({ week: key, ids: [] }));
-    } catch { setClaimed([]); }
+      return saved && saved.week === key && Array.isArray(saved.ids) ? saved.ids : [];
+    } catch { return []; }
   }, [storageKey, key]);
 
-  const claim = (challenge: Challenge) => {
+  // Claims live on the account, so claiming on one device also claims it on the
+  // others. On-device storage is only the offline fallback.
+  useEffect(() => {
+    let active = true;
+    const local = readLocal();
+    setClaimed(local);
+    void getChallengeClaims(key).then((cloud) => {
+      if (!active || !cloud) return;
+      const merged = Array.from(new Set([...cloud, ...local]));
+      setClaimed(merged);
+      try { window.localStorage.setItem(storageKey, JSON.stringify({ week: key, ids: merged })); } catch { /* private mode */ }
+      if (merged.length !== cloud.length) void saveChallengeClaims(key, merged);
+    });
+    return () => { active = false; };
+  }, [storageKey, key, readLocal]);
+
+  const claim = async (challenge: Challenge) => {
     if (claimed.includes(challenge.id)) return;
-    const next = [...claimed, challenge.id];
+    // Re-check the account first so a claim from another device blocks this one.
+    const cloud = await getChallengeClaims(key);
+    if (cloud && cloud.includes(challenge.id)) {
+      setClaimed(Array.from(new Set([...claimed, ...cloud])));
+      return;
+    }
+    const next = Array.from(new Set([...(cloud ?? []), ...claimed, challenge.id]));
     setClaimed(next);
     try { window.localStorage.setItem(storageKey, JSON.stringify({ week: key, ids: next })); } catch { /* private mode */ }
+    void saveChallengeClaims(key, next);
     onAward(challenge.xp);
     setBurst(challenge.xp);
   };
