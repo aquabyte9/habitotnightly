@@ -351,7 +351,7 @@ export async function getChallengeClaims(week: string): Promise<string[] | null>
     const userId = await requireUserId();
     const { data, error } = await supabase
       .from('profiles')
-      .select('challenge_claims')
+      .select('challenge_claims' as never)
       .eq('id', userId)
       .maybeSingle();
     if (error) return null;
@@ -370,7 +370,7 @@ export async function saveChallengeClaims(week: string, ids: string[]): Promise<
     const userId = await requireUserId();
     const { error } = await supabase
       .from('profiles')
-      .upsert({ id: userId, challenge_claims: { week, ids } });
+      .upsert({ id: userId, challenge_claims: { week, ids } } as never);
     return !error;
   } catch {
     return false;
