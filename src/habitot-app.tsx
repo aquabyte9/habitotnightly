@@ -25,6 +25,8 @@ import {
   signUp,
   updateTask,
   updateProfile,
+  getChallengeClaims,
+  saveChallengeClaims,
   type HabitProfile,
   type HabitTask,
   type LeaderboardEntry,
