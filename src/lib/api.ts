@@ -340,3 +340,39 @@ export async function deleteTask(id: string) {
   const { error } = await supabase.from('tasks').delete().eq('id', id);
   if (error) throw asError(error, 'Unable to delete that task.');
 }
+
+/**
+ * Weekly challenge claims, stored on the account so a claim made on one device
+ * is already claimed everywhere. Returns null when the cloud column is missing,
+ * so the caller can fall back to on-device storage.
+ */
+export async function getChallengeClaims(week: string): Promise<string[] | null> {
+  try {
+    const userId = await requireUserId();
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('challenge_claims' as never)
+      .eq('id', userId)
+      .maybeSingle();
+    if (error) return null;
+    const raw = (data as { challenge_claims?: unknown } | null)?.challenge_claims;
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    const record = parsed as { week?: string; ids?: string[] } | null;
+    if (!record || record.week !== week || !Array.isArray(record.ids)) return [];
+    return record.ids.filter((id): id is string => typeof id === 'string');
+  } catch {
+    return null;
+  }
+}
+
+export async function saveChallengeClaims(week: string, ids: string[]): Promise<boolean> {
+  try {
+    const userId = await requireUserId();
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({ id: userId, challenge_claims: { week, ids } } as never);
+    return !error;
+  } catch {
+    return false;
+  }
+}
